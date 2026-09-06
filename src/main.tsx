@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import './styles/olympic-transitions.css';
+import './styles/public-rebuild.css';
 import './styles/visual-system.css';
 import './styles/theme-closure.css';
 import './styles/uos-design-system.css';

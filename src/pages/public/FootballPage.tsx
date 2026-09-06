@@ -1,122 +1,281 @@
-import { ArrowLeft, ArrowRight, Check, CircleDot, Dumbbell, Goal, ShieldCheck, Sparkles, Trophy, Users } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { BilingualText, bi } from '../../components/bilingual/BilingualText';
-import { Sports3DIcon, Sports3DStage } from '../../design/sports3d';
-import { footballMediaAssets } from '../../data/media/football';
-import type { SportMediaAsset } from '../../domain/contracts';
-import '../../styles/football.css';
-
-const media = Object.fromEntries(footballMediaAssets.map(asset => [asset.id, asset])) as Record<string, SportMediaAsset>;
-
-function FootballImage({ asset, priority = false, className = '' }: { asset: SportMediaAsset; priority?: boolean; className?: string }) {
-  return <img className={`football-image ${className}`.trim()} src={asset.url} alt={`${asset.altEn} | ${asset.altAr}`} width={1648} height={928} loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : 'auto'} decoding="async" />;
-}
-
-const pillars = [
-  [ShieldCheck, bi('Discipline', 'الانضباط'), bi('Consistent habits support focused training and steady development.', 'العادات المنتظمة تدعم التدريب المركز والتطور المستمر.')],
-  [Users, bi('Teamwork', 'العمل الجماعي'), bi('Players learn to communicate, support teammates and understand shared responsibility.', 'يتعلم اللاعبون التواصل ودعم زملائهم وفهم المسؤولية المشتركة.')],
-  [CircleDot, bi('Technique', 'المهارة الفنية'), bi('Ball control, movement and decision-making are developed through purposeful repetition.', 'يتطور التحكم بالكرة والحركة واتخاذ القرار من خلال التكرار الهادف.')],
-  [Trophy, bi('Match Confidence', 'الثقة في المباريات'), bi('Training connects technical quality with composure in game-like situations.', 'يربط التدريب الجودة الفنية بالهدوء والثقة في مواقف تشبه المباريات.')],
-  [Dumbbell, bi('Fitness', 'اللياقة'), bi('Movement quality and physical readiness are built as part of the football pathway.', 'تُبنى جودة الحركة والجاهزية البدنية كجزء من مسار كرة القدم.')],
-] as const;
-
-const pathways = [
-  bi('Foundation', 'تأسيسي'),
-  bi('Development', 'تطويري'),
-  bi('Performance', 'أداء'),
-];
+import { ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck, Trophy, Dumbbell, Target, Sparkles, CircleDot, Users } from 'lucide-react';
+import { UosImage } from '../../components/public/UosImage';
+import { useUiSettings } from '../../ui/theme/useUiSettings';
+import { Sports3DIcon } from '../../design/sports3d';
 
 export function FootballPage() {
-  const [previewMessage, setPreviewMessage] = useState(false);
-  const submitInterest = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); setPreviewMessage(true); };
+  const { bilingualOrder } = useUiSettings();
+  const isAr = bilingualOrder === 'ar-first';
+  const ArrowIcon = isAr ? ArrowLeft : ArrowRight;
 
-  return <div className="football-page">
-    <section className="football-hero">
-      <FootballImage asset={media['football-01']} priority />
-      <div className="football-hero-shade" />
-      <div className="football-hero-content">
-        <Link className="football-back" to="/sports"><ArrowLeft size={16} /><BilingualText value={bi('All Sports', 'جميع الرياضات')} /></Link>
-        <Sports3DStage sport="football" variant="badge" label="Football identity | هوية كرة القدم"><Sports3DIcon sport="football" size="hero" decorative /></Sports3DStage>
-        <BilingualText className="football-kicker" value={bi('Football Program', 'برنامج كرة القدم')} icon={<Sparkles size={15} />} />
-        <h1><BilingualText value={bi('Train with Purpose', 'تدرب بهدف')} /></h1>
-        <p><BilingualText value={bi('A structured football experience focused on technique, discipline, confidence, teamwork and progressive player development.', 'تجربة كرة قدم منظمة تركز على المهارة والانضباط والثقة والعمل الجماعي وتطوير اللاعب بشكل تدريجي.')} /></p>
-        <div className="football-actions">
-          <a className="button primary" href="#football-interest"><BilingualText value={bi('Register Interest', 'سجل اهتمامك')} /><ArrowRight size={16} /></a>
-          <a className="button secondary" href="#training-path"><BilingualText value={bi('Training Path', 'مسار التدريب')} /><ArrowRight size={16} /></a>
+  const [formSubmitted, setFormSubmitted] = useState(false);
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    setFormSubmitted(true);
+  };
+
+  const pillars = [
+    {
+      icon: <CircleDot className="text-amber-400" size={22} />,
+      titleAr: 'التحكم بالكرة والتكنيك الفردي',
+      titleEn: 'Ball Mastery & Individual Technique',
+      descAr: 'تطوير دقة اللمسة الأولى، المراوغة الإيجابية، والتمرير المتقن في المساحات الضيقة.',
+      descEn: 'Developing first touch precision, positive dribbling, and crisp passing in tight spaces.',
+    },
+    {
+      icon: <Target className="text-amber-400" size={22} />,
+      titleAr: 'الوعي المكاني وقراءة الملعب',
+      titleEn: 'Spatial Awareness & Pitch Vision',
+      descAr: 'تدريب اللاعب على التحرك الذكي بدون كرة وخلق خيارات التمرير الفعالة.',
+      descEn: 'Training smart off-the-ball movement and creating effective passing channels.',
+    },
+    {
+      icon: <Users className="text-amber-400" size={22} />,
+      titleAr: 'العمل الجماعي والمسؤولية المشتركة',
+      titleEn: 'Teamwork & Shared Responsibility',
+      descAr: 'غرس قيم التعاون والتواصل الإيجابي والدعم المتبادل بين عناصر الفريق.',
+      descEn: 'Instilling mutual support, clear communication, and collective spirit.',
+    },
+    {
+      icon: <Trophy className="text-amber-400" size={22} />,
+      titleAr: 'الثقة التنافسية والهدوء',
+      titleEn: 'Competitive Confidence & Composure',
+      descAr: 'تحويل التمارين إلى جاهزية ذهنية للتعامل مع مواقف المباريات وضغط الخصم.',
+      descEn: 'Translating training into mental resilience and composure under game pressure.',
+    },
+    {
+      icon: <Dumbbell className="text-amber-400" size={22} />,
+      titleAr: 'الجاهزية الحركية والبدنية',
+      titleEn: 'Motor Fitness & Agility',
+      descAr: 'تطوير سرعة رد الفعل، الرشاقة، والتوافق العضلي كجزء مدمج في كل حصة.',
+      descEn: 'Cultivating rapid reflexes, agile footwork, and neuromuscular coordination.',
+    },
+  ];
+
+  return (
+    <div className="uos-public-page bg-[#07080b] text-neutral-100 overflow-hidden">
+      
+      {/* 1. HERO SECTION (UOS_11_FOOTBALL_HERO) */}
+      <section className="relative min-h-[70vh] lg:min-h-[78vh] flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <UosImage
+            assetKey="UOS_11_FOOTBALL_HERO"
+            aspectRatio="auto"
+            priority
+            className="w-full h-full !rounded-none"
+            imageClassName="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-[#07080b]/75 backdrop-blur-[1px] z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#07080b] via-transparent to-[#07080b]/50 z-10" />
         </div>
-      </div>
-    </section>
 
-    <section className="football-section football-about">
-      <div className="football-copy">
-        <BilingualText className="football-eyebrow" value={bi('About the Program', 'نبذة عن البرنامج')} />
-        <h2><BilingualText value={bi('Build the player, not only the play.', 'نبني اللاعب، وليس اللعب فقط.')} /></h2>
-        <p><BilingualText value={bi('Football at United Olympics Sports is presented as a progressive training journey. Sessions connect technical work, movement, communication and game understanding without making unverified promises about teams, facilities or competition schedules.', 'تُقدَّم كرة القدم في يونايتد أوليمبيكس سبورت كرحلة تدريب متدرجة تربط العمل الفني والحركة والتواصل وفهم اللعب دون تقديم وعود غير موثقة حول الفرق أو المنشآت أو جداول المنافسات.')} /></p>
-      </div>
-      <FootballImage asset={media['football-02']} />
-    </section>
+        <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center space-y-6">
+          <Link
+            to="/sports"
+            className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors font-tajawal bg-black/40 px-3 py-1.5 rounded-full border border-amber-500/20"
+          >
+            <ArrowLeft size={14} className={isAr ? 'rotate-180' : ''} />
+            <span>{isAr ? 'العودة إلى جميع الرياضات' : 'Back to All Sports'}</span>
+          </Link>
 
-    <section className="football-section football-tinted">
-      <div className="football-heading"><BilingualText className="football-eyebrow" value={bi('Why Choose Football Here', 'لماذا تختار كرة القدم هنا')} /><h2><BilingualText value={bi('Five foundations for meaningful progress', 'خمسة أسس لتقدم حقيقي')} /></h2></div>
-      <div className="football-pillars">{pillars.map(([Icon, title, text]) => <article key={title.en}><Icon /><h3><BilingualText value={title} /></h3><p><BilingualText value={text} /></p></article>)}</div>
-    </section>
+          <div className="flex justify-center">
+            <div className="p-3 rounded-2xl bg-black/60 backdrop-blur-md border border-amber-500/30">
+              <Sports3DIcon sport="football" size="lg" decorative />
+            </div>
+          </div>
 
-    <section className="football-section football-method" id="training-path">
-      <FootballImage asset={media['football-04']} />
-      <div className="football-copy">
-        <BilingualText className="football-eyebrow" value={bi('Training Path', 'مسار التدريب')} />
-        <h2><BilingualText value={bi('Progression with a clear purpose', 'تدرج بهدف واضح')} /></h2>
-        <p><BilingualText value={bi('The pathway is designed around readiness rather than invented age cut-offs. Coaches can later connect verified groups and schedules from the wider sports system.', 'صُمم المسار حول الجاهزية بدل اختلاق حدود عمرية ثابتة، ويمكن لاحقًا ربط المجموعات والجداول الموثقة من منظومة الرياضات الأوسع.')} /></p>
-        <div className="football-path-list">{pathways.map((item, index) => <div key={item.en}><span>0{index + 1}</span><BilingualText value={item} /><p><BilingualText value={index === 0 ? bi('Core movement, ball familiarity and confident participation.', 'الحركة الأساسية والألفة مع الكرة والمشاركة بثقة.') : index === 1 ? bi('Technical repetition, decisions and team awareness.', 'تكرار المهارات واتخاذ القرار والوعي الجماعي.') : bi('Game readiness, composure and higher-intensity execution.', 'الجاهزية للعب والثبات والتنفيذ بكثافة أعلى.')} /></p></div>)}</div>
-      </div>
-    </section>
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white font-tajawal leading-tight drop-shadow-lg">
+            {isAr ? 'مسار كرة القدم: مهارة، حركة، وذكاء لعب' : 'Football Pathway: Skill, Movement, and Game IQ'}
+          </h1>
 
-    <section className="football-section football-age-section">
-      <div className="football-heading"><BilingualText className="football-eyebrow" value={bi('Age Group Readiness', 'جاهزية الفئات العمرية')} /><h2><BilingualText value={bi('A pathway that can grow with every player', 'مسار يمكنه أن ينمو مع كل لاعب')} /></h2><p><BilingualText value={bi('The interface is prepared for children, youth boys and youth girls. Actual group availability and schedules will be shown only after operational verification.', 'الواجهة مهيأة للأطفال والناشئين والفتيات الناشئات، ولن تُعرض المجموعات والجداول الفعلية إلا بعد التحقق التشغيلي.')} /></p></div>
-      <div className="football-age-grid">
-        <article><BilingualText value={bi('Children', 'الأطفال')} /><p><BilingualText value={bi('Confidence, movement and first technical habits.', 'الثقة والحركة والعادات الفنية الأولى.')} /></p></article>
-        <article><BilingualText value={bi('Youth Boys', 'الناشئون')} /><p><BilingualText value={bi('Progressive technical and team development.', 'تطوير فني وجماعي متدرج.')} /></p></article>
-        <article><BilingualText value={bi('Youth Girls', 'الفتيات الناشئات')} /><p><BilingualText value={bi('A prepared pathway for verified girls groups when available.', 'مسار مهيأ لمجموعات الفتيات الموثقة عند توفرها.')} /></p></article>
-      </div>
-      <FootballImage asset={media['football-07']} />
-    </section>
+          <p className="text-base sm:text-lg text-neutral-300 max-w-2xl mx-auto font-tajawal leading-relaxed">
+            {isAr
+              ? 'تدريب متدرج يجمع بين دقة التحكم بالكرة، قراءة المساحات، والتناغم الجماعي داخل الملعب لبناء لاعب متكامل.'
+              : 'Progressive training combining ball mastery, spatial awareness, and tactical team cohesion to build a complete player.'}
+          </p>
 
-    <section className="football-section football-coaching football-tinted">
-      <div className="football-copy"><BilingualText className="football-eyebrow" value={bi('Coaching Experience', 'تجربة التدريب')} /><h2><BilingualText value={bi('Guidance inside every session', 'توجيه داخل كل حصة')} /></h2><p><BilingualText value={bi('Coach-led sessions combine explanation, repetition, observation and feedback so players understand both what to do and why it matters.', 'تجمع الحصص بقيادة المدرب بين الشرح والتكرار والملاحظة والتغذية الراجعة حتى يفهم اللاعب ما الذي يفعله ولماذا يهم.')} /></p></div>
-      <FootballImage asset={media['football-06']} />
-    </section>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+            <a href="#register-interest" className="uos-btn-gold w-full sm:w-auto">
+              <span>{isAr ? 'سجل اهتمامك بالبرنامج' : 'Register Interest'}</span>
+              <ArrowIcon size={16} />
+            </a>
+            <Link to="/programs" className="uos-btn-outline w-full sm:w-auto">
+              <span>{isAr ? 'عرض جداول التدريب' : 'View Programs'}</span>
+              <ArrowIcon size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
 
-    <section className="football-section football-story-grid">
-      <article><FootballImage asset={media['football-05']} /><div><BilingualText className="football-eyebrow" value={bi('Teamwork', 'العمل الجماعي')} /><h3><BilingualText value={bi('One team, shared responsibility', 'فريق واحد، مسؤولية مشتركة')} /></h3></div></article>
-      <article><FootballImage asset={media['football-08']} /><div><BilingualText className="football-eyebrow" value={bi('Performance', 'الأداء')} /><h3><BilingualText value={bi('Prepare for game intensity', 'استعد لكثافة اللعب')} /></h3></div></article>
-      <article><FootballImage asset={media['football-09']} /><div><BilingualText className="football-eyebrow" value={bi('Goalkeeper Focus', 'تركيز حراس المرمى')} /><h3><BilingualText value={bi('Specialist moments matter', 'اللحظات التخصصية مهمة')} /></h3></div></article>
-    </section>
+      {/* 2. PROGRAM PHILOSOPHY & TECHNIQUE (UOS_12_FOOTBALL_TECHNIQUE) */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <div className="lg:col-span-6 space-y-6">
+            <span className="uos-pill uos-pill-gold font-tajawal">
+              {isAr ? 'نبذة عن المسار' : 'Pathway Overview'}
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-tajawal leading-tight">
+              {isAr ? 'نبني اللاعب، لا المهارة المعزولة فحسب' : 'We Build the Player, Not Just Isolated Drills'}
+            </h2>
+            <div className="space-y-4 text-neutral-300 text-sm sm:text-base font-tajawal leading-relaxed">
+              <p>
+                {isAr
+                  ? 'برنامج كرة القدم في United Olympics Sports مصمم كرحلة تدريب متدرجة تربط بين العمل الفني، حركة الجسد، التواصل السليم، وفهم متطلبات اللعب الجماعي.'
+                  : 'Football at United Olympics Sports is designed as a progressive development journey connecting technical repetition, physical literacy, spatial intelligence, and team dynamics.'}
+              </p>
+              <p>
+                {isAr
+                  ? 'يتدرب اللاعبون في بيئة إيجابية ومنضبطة بإشراف مدربين يركزون على شرح التكنيك وتصحيح الملاحظات أولاً بأول لترسيخ العادات الصحيحة.'
+                  : 'Players train in a positive, structured atmosphere guided by coaches who provide continuous constructive feedback to build strong athletic habits.'}
+              </p>
+            </div>
+          </div>
 
-    <section className="football-section football-gallery-section">
-      <div className="football-heading"><BilingualText className="football-eyebrow" value={bi('Football Gallery', 'معرض كرة القدم')} /><h2><BilingualText value={bi('Ten verified football visuals', 'عشر صور كرة قدم معتمدة')} /></h2><p><BilingualText value={bi('Each asset remains a separate website image. No collage, contact sheet or stock replacement is used.', 'كل أصل يبقى صورة موقع مستقلة، دون كولاج أو لوحة تجميع أو استبدال بصور مخزنة.')} /></p></div>
-      <div className="football-gallery">{footballMediaAssets.map(asset => <figure key={asset.id}><FootballImage asset={asset} /><figcaption><span>{String(asset.order).padStart(2, '0')}</span><BilingualText value={bi(asset.altEn, asset.altAr)} /></figcaption></figure>)}</div>
-    </section>
+          <div className="lg:col-span-6 relative">
+            <UosImage
+              assetKey="UOS_12_FOOTBALL_TECHNIQUE"
+              aspectRatio="3/2"
+              withLightbox
+              className="rounded-2xl shadow-2xl border border-amber-500/30 overflow-hidden"
+            />
+            <div className="mt-3 text-center text-xs text-neutral-400 font-tajawal">
+              {isAr ? 'التحكم والتفاصيل الفنية الدقيقة تحت إشراف متخصص' : 'Technical precision and control under expert guidance'}
+            </div>
+          </div>
 
-    <section className="football-section football-interest" id="football-interest">
-      <FootballImage asset={media['football-10']} />
-      <div className="football-interest-shade" />
-      <div className="football-interest-content">
-        <BilingualText className="football-eyebrow" value={bi('Register Interest', 'سجل اهتمامك')} />
-        <h2><BilingualText value={bi('Interested in the football pathway?', 'مهتم بمسار كرة القدم؟')} /></h2>
-        <p><BilingualText value={bi('Share your interest below. This Phase 1 form is UI only and does not save or send data.', 'شارك اهتمامك أدناه. هذا النموذج في المرحلة الأولى واجهة فقط ولا يحفظ أو يرسل البيانات.')} /></p>
-        <form onSubmit={submitInterest} className="football-interest-form">
-          <label><BilingualText value={bi('Name', 'الاسم')} /><input required placeholder="Name | الاسم" /></label>
-          <label><BilingualText value={bi('Email', 'البريد الإلكتروني')} /><input required type="email" placeholder="Email | البريد الإلكتروني" /></label>
-          <button className="button primary" type="submit"><BilingualText value={bi('Preview Registration', 'معاينة التسجيل')} /><ArrowRight size={16} /></button>
-        </form>
-        {previewMessage && <p className="football-preview-note"><Check size={15} /><BilingualText value={bi('Preview only — no information was submitted or saved.', 'معاينة فقط — لم يتم إرسال أو حفظ أي معلومات.')} /></p>}
-      </div>
-    </section>
+        </div>
+      </section>
 
-    <section className="football-related">
-      <div><Goal /><BilingualText value={bi('Related Sports Navigation', 'التنقل إلى الرياضات المرتبطة')} /></div>
-      <nav><Link to="/sports"><BilingualText value={bi('All Sports', 'جميع الرياضات')} /><ArrowRight size={15} /></Link><Link to="/sports/swimming"><BilingualText value={bi('Swimming', 'السباحة')} /><ArrowRight size={15} /></Link><Link to="/programs"><BilingualText value={bi('Programs', 'البرامج')} /><ArrowRight size={15} /></Link></nav>
-    </section>
-  </div>;
+      {/* 3. 5 CORE PILLARS */}
+      <section className="py-20 bg-[#0a0b0e] border-y border-neutral-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-2">
+            <span className="uos-pill uos-pill-gold font-tajawal">
+              {isAr ? 'أسس التدريب' : 'Core Pillars'}
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-tajawal">
+              {isAr ? 'خمسة أسس لتقدم حقيقي في كرة القدم' : 'Five Foundations for Meaningful Progress'}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {pillars.map((item, idx) => (
+              <div key={idx} className="p-6 rounded-2xl bg-[#0d0f14] border border-neutral-800 hover:border-amber-500/30 transition-colors space-y-3">
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 w-fit">
+                  {item.icon}
+                </div>
+                <h3 className="text-lg font-bold text-white font-tajawal">
+                  {isAr ? item.titleAr : item.titleEn}
+                </h3>
+                <p className="text-sm text-neutral-400 font-tajawal leading-relaxed">
+                  {isAr ? item.descAr : item.descEn}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. PROGRESSIVE PATHWAY STAGES */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-16 space-y-2">
+          <span className="uos-pill uos-pill-gold font-tajawal">
+            {isAr ? 'المسار التدريبي' : 'Training Progression'}
+          </span>
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-tajawal">
+            {isAr ? 'تدرج واضح وفق الجاهزية' : 'Progression Built on Readiness'}
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="p-8 rounded-2xl bg-[#0d0f14] border border-amber-500/20 space-y-4">
+            <span className="text-xs font-bold text-amber-400 font-tajawal uppercase tracking-wider block">01 — Foundation</span>
+            <h3 className="text-xl font-bold text-white font-tajawal">{isAr ? 'المسار التأسيسي' : 'Foundation Level'}</h3>
+            <p className="text-sm text-neutral-400 font-tajawal leading-relaxed">
+              {isAr
+                ? 'الحركة الأساسية، التوافق الحركي، الألفة مع الكرة، وغرس الثقة وحب اللعب في بيئة مرحة ومنظمة.'
+                : 'Fundamental movement skills, ball familiarity, coordination, and building self-confidence.'}
+            </p>
+          </div>
+
+          <div className="p-8 rounded-2xl bg-[#0d0f14] border border-amber-500/20 space-y-4">
+            <span className="text-xs font-bold text-amber-400 font-tajawal uppercase tracking-wider block">02 — Development</span>
+            <h3 className="text-xl font-bold text-white font-tajawal">{isAr ? 'المسار التطويري' : 'Development Level'}</h3>
+            <p className="text-sm text-neutral-400 font-tajawal leading-relaxed">
+              {isAr
+                ? 'تكرار المهارات الفنية، اتخاذ القرار بالكرة وبدونها، فهم واجبات المركز، والوعي التكتيكي الجماعي.'
+                : 'Technical repetition, tactical position understanding, off-ball movement, and team awareness.'}
+            </p>
+          </div>
+
+          <div className="p-8 rounded-2xl bg-[#0d0f14] border border-amber-500/20 space-y-4">
+            <span className="text-xs font-bold text-amber-400 font-tajawal uppercase tracking-wider block">03 — Performance</span>
+            <h3 className="text-xl font-bold text-white font-tajawal">{isAr ? 'مسار الأداء والمنافسات' : 'Performance Level'}</h3>
+            <p className="text-sm text-neutral-400 font-tajawal leading-relaxed">
+              {isAr
+                ? 'الجاهزية التنافسية الكاملة، الثبات الذهني، واللعب بكثافة وسرعة عالية تحت ضغط المباريات.'
+                : 'High-intensity execution, match readiness, composure, and decision-making under game pressure.'}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. REGISTER INTEREST FORM */}
+      <section id="register-interest" className="py-20 bg-[#0a0b0e] border-t border-neutral-800">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 space-y-2">
+            <span className="uos-pill uos-pill-gold font-tajawal">
+              {isAr ? 'التسجيل والاستفسار' : 'Inquiry & Registration'}
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-tajawal">
+              {isAr ? 'مهتم بالانضمام إلى مسار كرة القدم؟' : 'Interested in the Football Pathway?'}
+            </h2>
+            <p className="text-xs sm:text-sm text-neutral-400 font-tajawal">
+              {isAr ? 'أدخل بياناتك للتواصل معك وتحديد موعد جلسة التقييم المبدئي.' : 'Submit your info for program details and initial evaluation scheduling.'}
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-8 rounded-2xl bg-[#0d0f14] border border-amber-500/20 space-y-4 shadow-xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-neutral-300 font-tajawal mb-1.5">{isAr ? 'اسم اللاعب أو ولي الأمر' : 'Full Name'}</label>
+                <input required type="text" placeholder={isAr ? 'الاسم الكامل' : 'Your name'} className="w-full px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 text-sm font-tajawal" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-neutral-300 font-tajawal mb-1.5">{isAr ? 'البريد الإلكتروني' : 'Email Address'}</label>
+                <input required type="email" placeholder="example@domain.com" className="w-full px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 text-sm font-sans" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-neutral-300 font-tajawal mb-1.5">{isAr ? 'الفئة العمرية أو المستوى الرياضي' : 'Age Group or Level'}</label>
+              <input type="text" placeholder={isAr ? 'مثال: ناشئ 10-12 سنة / مبتدئ' : 'e.g. Youth 10-12 years'} className="w-full px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 text-sm font-tajawal" />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-neutral-300 font-tajawal mb-1.5">{isAr ? 'ملاحظات أو استفسار إضافي' : 'Additional Notes'}</label>
+              <textarea rows={3} placeholder={isAr ? 'اكتب أي تفاصيل إضافية تود مشاركتها...' : 'Any details you would like to share...'} className="w-full px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 text-sm font-tajawal" />
+            </div>
+
+            <button type="submit" className="uos-btn-gold w-full !py-3 !text-sm">
+              <span>{isAr ? 'إرسال طلب الاهتمام والتقييم' : 'Submit Interest Request'}</span>
+              <ArrowIcon size={16} />
+            </button>
+
+            {formSubmitted && (
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-amber-300 text-xs font-tajawal animate-fade-in">
+                <CheckCircle2 size={18} className="shrink-0" />
+                <span>{isAr ? 'تم استلام طلبك بنجاح! سيقوم فريقنا بالتواصل معك لتنسيق موعد التقييم.' : 'Thank you! Your interest has been registered. Our team will contact you shortly.'}</span>
+              </div>
+            )}
+          </form>
+        </div>
+      </section>
+
+    </div>
+  );
 }

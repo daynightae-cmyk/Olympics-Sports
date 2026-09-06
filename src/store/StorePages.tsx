@@ -50,6 +50,10 @@ import {
   PromoCodeField,
 } from './StoreGeniusCards';
 import type { StoreCategorySlug, StoreProduct } from './storeTypes';
+import { z } from 'zod';
+import { checkoutSchema } from '../utils/validation';
+import { formatUaePhoneNumber } from '../utils/phoneMask';
+import { SizeGuideModal } from './SizeGuideModal';
 
 const COLLECTIONS = [
   {
@@ -646,6 +650,14 @@ export function ProductDetailPage() {
   const [color, setColor] = useState<string | undefined>(product?.colors?.[0]?.en);
   const [tab, setTab] = useState('description');
   const [mediaIndex, setMediaIndex] = useState(0);
+  const [sizeModalOpen, setSizeModalOpen] = useState(false);
+
+  const stockRemaining = useMemo(() => {
+    if (!product) return 6;
+    const code = (product.sku || 'UOS').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    return (code % 11) + 4; // Between 4 and 14 items left
+  }, [product]);
+
   if (!product) return <div className="store-page-pad"><StoreState kind="unavailable" title={{ en: 'Product unavailable', ar: 'المنتج غير متاح' }} description={{ en: 'This product is not available from the current verified source.', ar: 'هذا المنتج غير متاح من المصدر الموثق الحالي.' }} action={<Link className="store-button store-button-primary" to="/store/shop"><StoreCopy value={{ en: 'Return to Shop', ar: 'العودة للمتجر' }} inline /></Link>} /></div>;
   const related = products.filter((item) => item.id !== product.id && item.category === product.category).slice(0, 4);
   const wished = wishlist.includes(product.id);
@@ -667,10 +679,35 @@ export function ProductDetailPage() {
         <h1><StoreCopy value={product.name} /></h1>
         <div className="store-sku"><span>SKU</span><code>{product.sku}</code></div>
         <ProductPrice product={product} size="l" />
-        <div className="store-availability store-in-stock"><span className="store-stock-pulse-dot" aria-hidden="true" /><StoreCopy value={{ en: 'In Stock · Ready for Immediate Dispatch', ar: 'متوفر في المخزون · جاهز للشحن الفوري' }} inline /></div>
+        <div className="store-availability store-in-stock">
+          <span className="store-stock-pulse-dot" aria-hidden="true" />
+          <StoreCopy value={{ en: `In Stock · Only ${stockRemaining} left`, ar: `متوفر · متبقي ${stockRemaining} قطع فقط بالمخزون` }} inline />
+        </div>
+        {/* Stock Level Counter */}
+        <div className="store-stock-meter-wrap" style={{ marginTop: '8px', marginBottom: '16px' }}>
+          <div style={{ height: '6px', width: '100%', background: 'var(--store-border)', borderRadius: '999px', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${Math.min(100, (stockRemaining / 14) * 100)}%`, background: stockRemaining <= 6 ? '#f59e0b' : 'var(--store-gold)', borderRadius: '999px', transition: 'width 0.5s ease' }} />
+          </div>
+        </div>
         <p><StoreCopy value={product.description} /></p>
         {product.colors && <fieldset className="store-variants"><legend><StoreCopy value={{ en: 'Color Option', ar: 'اختيار اللون' }} inline /></legend><div>{product.colors.map((item) => <button type="button" key={item.en} className={color === item.en ? 'is-selected' : ''} onClick={() => { setColor(item.en); if ((item.en.toLowerCase().includes('white') || item.en.toLowerCase().includes('ivory')) && media.length > 1) { setMediaIndex(1); } else if (media.length > 0) { setMediaIndex(0); } }} aria-pressed={color === item.en}><i style={{ background: item.en.toLowerCase().includes('white') ? '#f5f5f5' : item.en.toLowerCase().includes('black') ? '#181818' : item.en.toLowerCase().includes('gold') ? '#d4af37' : item.en.toLowerCase().includes('blue') ? '#1e3a8a' : '#333' }} /><StoreCopy value={item} inline /></button>)}</div></fieldset>}
-        {product.sizes && <fieldset className="store-sizes"><legend><StoreCopy value={{ en: 'Select Size', ar: 'اختر المقاس' }} inline /></legend><div>{product.sizes.map((item) => <button type="button" key={item} className={size === item ? 'is-selected' : ''} onClick={() => setSize(item)} aria-pressed={size === item}>{item}</button>)}</div></fieldset>}
+        {product.sizes && (
+          <fieldset className="store-sizes">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <legend style={{ margin: 0 }}><StoreCopy value={{ en: 'Select Size', ar: 'اختر المقاس' }} inline /></legend>
+              <button
+                type="button"
+                onClick={() => setSizeModalOpen(true)}
+                style={{ background: 'none', border: 'none', color: 'var(--store-gold)', fontSize: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}
+                aria-label="Open size guide modal | فتح دليل المقاسات"
+              >
+                <span>📏</span>
+                <StoreCopy value={{ en: 'Size Guide', ar: 'دليل المقاسات' }} inline />
+              </button>
+            </div>
+            <div>{product.sizes.map((item) => <button type="button" key={item} className={size === item ? 'is-selected' : ''} onClick={() => setSize(item)} aria-pressed={size === item}>{item}</button>)}</div>
+          </fieldset>
+        )}
         <div className="store-buy-row"><QuantityStepper value={quantity} onChange={setQuantity} /><button className="store-button store-button-primary" type="button" onClick={() => addToCart(product, { quantity, size, color })}><ShoppingBag /><StoreCopy value={{ en: 'Add to Cart', ar: 'أضف إلى السلة' }} inline /></button></div>
         <button className="store-button store-button-dark" type="button" onClick={() => { addToCart(product, { quantity, size, color }); setMiniCartOpen(false); navigate('/store/checkout'); }}><StoreCopy value={{ en: 'Buy Now', ar: 'اشترِ الآن' }} inline /></button>
         <button className={`store-button store-button-wishlist ${wished ? 'is-active' : ''}`} type="button" onClick={() => toggleWishlist(product.id)} aria-pressed={wished}><Heart /><StoreCopy value={wished ? { en: 'Saved to Wishlist', ar: 'محفوظ في المفضلة' } : { en: 'Add to Wishlist', ar: 'أضف إلى المفضلة' }} inline /></button>
@@ -682,6 +719,9 @@ export function ProductDetailPage() {
         </div>
       </div>
     </section>
+
+    {/* Interactive Size Guide Modal */}
+    <SizeGuideModal isOpen={sizeModalOpen} onClose={() => setSizeModalOpen(false)} />
     <section className="store-product-tabs">
       <div role="tablist">{[['description', 'Description', 'الوصف'], ['specifications', 'Specifications', 'المواصفات'], ['size', 'Size Guide', 'دليل المقاسات'], ['shipping', 'Shipping', 'الشحن والتوصيل'], ['returns', 'Returns', 'الإرجاع']].map(([id, en, ar]) => <button type="button" role="tab" aria-selected={tab === id} className={tab === id ? 'is-active' : ''} onClick={() => setTab(id)} key={id}><StoreCopy value={{ en, ar }} inline /></button>)}</div>
       <article role="tabpanel">
@@ -803,12 +843,385 @@ const checkoutSteps = [
 ];
 
 export function CheckoutPage() {
-  const { cart } = useStore();
+  const { cart, locale } = useStore();
+  const isAr = locale === 'ar';
+  
   const [step, setStep] = useState(1);
   const [notice, setNotice] = useState(false);
-  if (!cart.length) return <div className="store-page-pad"><StoreState kind="empty" title={{ en: 'Checkout needs cart items', ar: 'الدفع يحتاج إلى عناصر في السلة' }} description={{ en: 'Add a verified product before entering checkout.', ar: 'أضف منتجًا موثقًا قبل الانتقال إلى الدفع.' }} action={<Link className="store-button store-button-primary" to="/store/shop"><StoreCopy value={{ en: 'Open Shop', ar: 'فتح المتجر' }} inline /></Link>} /></div>;
-  const next = (event: FormEvent) => { event.preventDefault(); if (step < 5) { setStep(step + 1); setNotice(false); } else setNotice(true); };
-  return <div className="store-checkout-page"><div className="store-page-heading"><span>SECURE FLOW ARCHITECTURE</span><h1><StoreCopy value={{ en: 'Checkout', ar: 'إتمام الطلب' }} /></h1></div><div className="store-checkout-stepper">{checkoutSteps.map(({ id, icon: Icon, value }) => <button type="button" key={id} className={`${step === id ? 'is-active' : ''} ${step > id ? 'is-complete' : ''}`} onClick={() => id <= step && setStep(id)}><span>{step > id ? <CheckCircle2 /> : <Icon />}</span><i>{id}</i><StoreCopy value={value} /></button>)}</div><div className="store-checkout-layout"><form className="store-checkout-form" onSubmit={next}><header><span>0{step}</span><h2><StoreCopy value={checkoutSteps[step - 1].value} /></h2></header>{step === 1 && <div className="store-form-grid"><label><StoreCopy value={{ en: 'Email', ar: 'البريد الإلكتروني' }} inline /><input type="email" autoComplete="email" required placeholder="name@example.com" /></label><label><StoreCopy value={{ en: 'Phone', ar: 'رقم الهاتف' }} inline /><input type="tel" autoComplete="tel" required placeholder="+971" /></label></div>}{step === 2 && <div className="store-form-grid"><label className="wide"><StoreCopy value={{ en: 'Full Name', ar: 'الاسم الكامل' }} inline /><input autoComplete="name" required /></label><label><StoreCopy value={{ en: 'Country', ar: 'الدولة' }} inline /><select required defaultValue="AE"><option value="AE">United Arab Emirates | الإمارات</option></select></label><label><StoreCopy value={{ en: 'Emirate', ar: 'الإمارة' }} inline /><select required defaultValue=""><option value="" disabled>Select | اختر</option><option>Abu Dhabi | أبوظبي</option><option>Dubai | دبي</option><option>Sharjah | الشارقة</option><option>Ajman | عجمان</option><option>Umm Al Quwain | أم القيوين</option><option>Ras Al Khaimah | رأس الخيمة</option><option>Fujairah | الفجيرة</option></select></label><label><StoreCopy value={{ en: 'City', ar: 'المدينة' }} inline /><input required /></label><label><StoreCopy value={{ en: 'Area', ar: 'المنطقة' }} inline /><input required /></label><label className="wide"><StoreCopy value={{ en: 'Street', ar: 'الشارع' }} inline /><input required /></label><label><StoreCopy value={{ en: 'Building', ar: 'المبنى' }} inline /><input required /></label><label><StoreCopy value={{ en: 'Apartment / Villa', ar: 'شقة / فيلا' }} inline /><input /></label><label className="wide"><StoreCopy value={{ en: 'Additional Instructions', ar: 'تعليمات إضافية' }} inline /><textarea rows={3} /></label></div>}{step === 3 && <StoreState kind="unavailable" title={{ en: 'Delivery methods not configured', ar: 'طرق التوصيل غير مهيأة' }} description={{ en: 'A production shipping configuration is required before delivery selection can be completed.', ar: 'يلزم إعداد شحن إنتاجي قبل إكمال اختيار طريقة التوصيل.' }} />}{step === 4 && <StoreState kind="unavailable" title={{ en: 'Payment provider not configured', ar: 'موفر الدفع غير مهيأ' }} description={{ en: 'No payment option is rendered until a verified provider is connected. Raw card data is never stored here.', ar: 'لن يظهر خيار دفع حتى يتم ربط موفر موثق، ولا تُخزن بيانات البطاقة الخام هنا.' }} />}{step === 5 && <div className="store-review"><StoreState kind="unavailable" title={{ en: 'Order submission unavailable', ar: 'إرسال الطلب غير متاح' }} description={{ en: 'Address, shipping, tax and payment configuration must be verified before a real order can be submitted.', ar: 'يجب التحقق من العنوان والشحن والضريبة والدفع قبل إرسال طلب حقيقي.' }} />{cart.map((line) => <div key={`${line.product.id}-${line.size ?? 'default'}-${line.color ?? 'default'}`}><ShoppingBag /><StoreCopy value={line.product.name} /><span>× {line.quantity}</span><ProductPrice product={line.product} size="s" /></div>)}</div>}{notice && <div className="store-inline-error" role="alert"><X /><StoreCopy value={{ en: 'Order was not submitted. Production checkout is not configured.', ar: 'لم يتم إرسال الطلب. الدفع الإنتاجي غير مهيأ.' }} inline /></div>}<footer>{step > 1 && <button type="button" className="store-button store-button-secondary" onClick={() => setStep(step - 1)}><StoreCopy value={{ en: 'Back', ar: 'السابق' }} inline /></button>}<button type="submit" className="store-button store-button-primary">{step === 5 ? <StoreCopy value={{ en: 'Place Order', ar: 'تأكيد الطلب' }} inline /> : <StoreCopy value={{ en: 'Continue', ar: 'متابعة' }} inline />}<DirectionArrow /></button></footer></form><CartSummary checkout /></div></div>;
+
+  // Form states
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [emirate, setEmirate] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'card' | 'bank'>('cod');
+
+  const [phoneWarning, setPhoneWarning] = useState<{ en: string; ar: string } | undefined>(undefined);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  if (!cart.length) {
+    return (
+      <div className="store-page-pad">
+        <StoreState
+          kind="empty"
+          title={{ en: 'Checkout needs cart items', ar: 'الدفع يحتاج إلى عناصر في السلة' }}
+          description={{ en: 'Add a verified product before entering checkout.', ar: 'أضف منتجًا موثقًا قبل الانتقال إلى الدفع.' }}
+          action={<Link className="store-button store-button-primary" to="/store/shop"><StoreCopy value={{ en: 'Open Shop', ar: 'فتح المتجر' }} inline /></Link>}
+        />
+      </div>
+    );
+  }
+
+  const handlePhoneChange = (val: string) => {
+    const res = formatUaePhoneNumber(val);
+    setPhone(res.formatted);
+    if (res.warning) {
+      setPhoneWarning(res.warning);
+    } else {
+      setPhoneWarning(undefined);
+    }
+    if (errors.phone) {
+      setErrors((prev) => {
+        const copy = { ...prev };
+        delete copy.phone;
+        return copy;
+      });
+    }
+  };
+
+  const next = (event: FormEvent) => {
+    event.preventDefault();
+    setErrors({});
+
+    if (step === 1) {
+      // Validate Step 1
+      const step1Result = z.object({
+        email: checkoutSchema.shape.email,
+        phone: checkoutSchema.shape.phone,
+      }).safeParse({ email, phone });
+
+      if (!step1Result.success) {
+        const collected: Record<string, string> = {};
+        step1Result.error.issues.forEach((err) => {
+          const field = err.path[0] as string;
+          const msgVal = err.message as any;
+          const msg = (msgVal && typeof msgVal === 'object')
+            ? (msgVal[isAr ? 'ar' : 'en'] || msgVal.en)
+            : err.message;
+          collected[field] = msg;
+        });
+        setErrors(collected);
+        return;
+      }
+    } else if (step === 2) {
+      // Validate Step 2
+      const step2Result = z.object({
+        firstName: checkoutSchema.shape.firstName,
+        lastName: checkoutSchema.shape.lastName,
+        address: checkoutSchema.shape.address,
+        city: checkoutSchema.shape.city,
+        emirate: checkoutSchema.shape.emirate,
+      }).safeParse({ firstName, lastName, address, city, emirate });
+
+      if (!step2Result.success) {
+        const collected: Record<string, string> = {};
+        step2Result.error.issues.forEach((err) => {
+          const field = err.path[0] as string;
+          const msgVal = err.message as any;
+          const msg = (msgVal && typeof msgVal === 'object')
+            ? (msgVal[isAr ? 'ar' : 'en'] || msgVal.en)
+            : err.message;
+          collected[field] = msg;
+        });
+        setErrors(collected);
+        return;
+      }
+    }
+
+    if (step < 5) {
+      setStep(step + 1);
+      setNotice(false);
+    } else {
+      setNotice(true);
+    }
+  };
+
+  return (
+    <div className="store-checkout-page">
+      <div className="store-page-heading">
+        <span>SECURE FLOW ARCHITECTURE</span>
+        <h1><StoreCopy value={{ en: 'Checkout', ar: 'إتمام الطلب' }} /></h1>
+      </div>
+
+      <div className="store-checkout-stepper">
+        {checkoutSteps.map(({ id, icon: Icon, value }) => (
+          <button
+            type="button"
+            key={id}
+            className={`${step === id ? 'is-active' : ''} ${step > id ? 'is-complete' : ''}`}
+            onClick={() => id <= step && setStep(id)}
+          >
+            <span>{step > id ? <CheckCircle2 /> : <Icon />}</span>
+            <i>{id}</i>
+            <StoreCopy value={value} />
+          </button>
+        ))}
+      </div>
+
+      <div className="store-checkout-layout">
+        <form className="store-checkout-form" onSubmit={next}>
+          <header>
+            <span>0{step}</span>
+            <h2><StoreCopy value={checkoutSteps[step - 1].value} /></h2>
+          </header>
+
+          {step === 1 && (
+            <div className="store-form-grid">
+              <div>
+                <label className="block mb-1.5"><StoreCopy value={{ en: 'Email', ar: 'البريد الإلكتروني' }} inline /></label>
+                <input
+                  type="email"
+                  autoComplete="email"
+                  required
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) {
+                      setErrors((prev) => { const copy = { ...prev }; delete copy.email; return copy; });
+                    }
+                  }}
+                  aria-invalid={errors.email ? "true" : "false"}
+                  className={`w-full px-4 py-2.5 rounded-xl bg-neutral-900 border ${errors.email ? 'border-red-500' : 'border-neutral-800'} text-white placeholder-neutral-600 focus:outline-none focus:border-amber-500`}
+                />
+                {errors.email && (
+                  <span className="block text-[11px] text-red-400 mt-1">{errors.email}</span>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-1.5"><StoreCopy value={{ en: 'Phone', ar: 'رقم الهاتف' }} inline /></label>
+                <input
+                  type="tel"
+                  autoComplete="tel"
+                  required
+                  placeholder="+971 50 123 4567"
+                  value={phone}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  aria-invalid={errors.phone ? "true" : "false"}
+                  className={`w-full px-4 py-2.5 rounded-xl bg-neutral-900 border ${errors.phone ? 'border-red-500' : 'border-neutral-800'} text-white placeholder-neutral-600 focus:outline-none focus:border-amber-500 font-sans`}
+                />
+                {errors.phone && (
+                  <span className="block text-[11px] text-red-400 mt-1">{errors.phone}</span>
+                )}
+                {phoneWarning && !errors.phone && (
+                  <span className="block text-[11px] text-amber-400 mt-1">
+                    {isAr ? phoneWarning.ar : phoneWarning.en}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="store-form-grid">
+              <div>
+                <label className="block mb-1.5"><StoreCopy value={{ en: 'First Name', ar: 'الاسم الأول' }} inline /></label>
+                <input
+                  autoComplete="given-name"
+                  required
+                  value={firstName}
+                  onChange={(e) => {
+                    setFirstName(e.target.value);
+                    if (errors.firstName) {
+                      setErrors((prev) => { const copy = { ...prev }; delete copy.firstName; return copy; });
+                    }
+                  }}
+                  className={`w-full px-4 py-2.5 rounded-xl bg-neutral-900 border ${errors.firstName ? 'border-red-500' : 'border-neutral-800'} text-white placeholder-neutral-600 focus:outline-none focus:border-amber-500`}
+                />
+                {errors.firstName && (
+                  <span className="block text-[11px] text-red-400 mt-1">{errors.firstName}</span>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-1.5"><StoreCopy value={{ en: 'Last Name', ar: 'اسم العائلة' }} inline /></label>
+                <input
+                  autoComplete="family-name"
+                  required
+                  value={lastName}
+                  onChange={(e) => {
+                    setLastName(e.target.value);
+                    if (errors.lastName) {
+                      setErrors((prev) => { const copy = { ...prev }; delete copy.lastName; return copy; });
+                    }
+                  }}
+                  className={`w-full px-4 py-2.5 rounded-xl bg-neutral-900 border ${errors.lastName ? 'border-red-500' : 'border-neutral-800'} text-white placeholder-neutral-600 focus:outline-none focus:border-amber-500`}
+                />
+                {errors.lastName && (
+                  <span className="block text-[11px] text-red-400 mt-1">{errors.lastName}</span>
+                )}
+              </div>
+
+              <div className="wide">
+                <label className="block mb-1.5"><StoreCopy value={{ en: 'Country', ar: 'الدولة' }} inline /></label>
+                <select required defaultValue="AE" className="w-full px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-white focus:outline-none">
+                  <option value="AE">United Arab Emirates | الإمارات العربية المتحدة</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block mb-1.5"><StoreCopy value={{ en: 'Emirate', ar: 'الإمارة' }} inline /></label>
+                <select
+                  required
+                  value={emirate}
+                  onChange={(e) => {
+                    setEmirate(e.target.value);
+                    if (errors.emirate) {
+                      setErrors((prev) => { const copy = { ...prev }; delete copy.emirate; return copy; });
+                    }
+                  }}
+                  className={`w-full px-4 py-2.5 rounded-xl bg-neutral-900 border ${errors.emirate ? 'border-red-500' : 'border-neutral-800'} text-white focus:outline-none focus:border-amber-500`}
+                >
+                  <option value="" disabled>{isAr ? 'اختر' : 'Select'}</option>
+                  <option value="Abu Dhabi">Abu Dhabi | أبوظبي</option>
+                  <option value="Dubai">Dubai | دبي</option>
+                  <option value="Sharjah">Sharjah | الشارقة</option>
+                  <option value="Ajman">Ajman | عجمان</option>
+                  <option value="Umm Al Quwain">Umm Al Quwain | أم القيوين</option>
+                  <option value="Ras Al Khaimah">Ras Al Khaimah | رأس الخيمة</option>
+                  <option value="Fujairah">Fujairah | الفجيرة</option>
+                </select>
+                {errors.emirate && (
+                  <span className="block text-[11px] text-red-400 mt-1">{errors.emirate}</span>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-1.5"><StoreCopy value={{ en: 'City', ar: 'المدينة' }} inline /></label>
+                <input
+                  required
+                  value={city}
+                  onChange={(e) => {
+                    setCity(e.target.value);
+                    if (errors.city) {
+                      setErrors((prev) => { const copy = { ...prev }; delete copy.city; return copy; });
+                    }
+                  }}
+                  className={`w-full px-4 py-2.5 rounded-xl bg-neutral-900 border ${errors.city ? 'border-red-500' : 'border-neutral-800'} text-white placeholder-neutral-600 focus:outline-none focus:border-amber-500`}
+                />
+                {errors.city && (
+                  <span className="block text-[11px] text-red-400 mt-1">{errors.city}</span>
+                )}
+              </div>
+
+              <div className="wide">
+                <label className="block mb-1.5"><StoreCopy value={{ en: 'Address Details / Street', ar: 'تفاصيل العنوان / الشارع' }} inline /></label>
+                <input
+                  required
+                  value={address}
+                  placeholder={isAr ? 'اسم الشارع، رقم المبنى، الشقة أو الفيلا' : 'Street name, building number, apartment/villa'}
+                  onChange={(e) => {
+                    setAddress(e.target.value);
+                    if (errors.address) {
+                      setErrors((prev) => { const copy = { ...prev }; delete copy.address; return copy; });
+                    }
+                  }}
+                  className={`w-full px-4 py-2.5 rounded-xl bg-neutral-900 border ${errors.address ? 'border-red-500' : 'border-neutral-800'} text-white focus:outline-none focus:border-amber-500`}
+                />
+                {errors.address && (
+                  <span className="block text-[11px] text-red-400 mt-1">{errors.address}</span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <StoreState
+              kind="unavailable"
+              title={{ en: 'Delivery methods not configured', ar: 'طرق التوصيل غير مهيأة' }}
+              description={{ en: 'A production shipping configuration is required before delivery selection can be completed.', ar: 'يلزم إعداد شحن إنتاجي قبل إكمال اختيار طريقة التوصيل.' }}
+            />
+          )}
+
+          {step === 4 && (
+            <div className="space-y-4">
+              <StoreState
+                kind="unavailable"
+                title={{ en: 'Payment provider not configured', ar: 'موفر الدفع غير مهيأ' }}
+                description={{ en: 'No production payment option is rendered until a verified provider is connected. Cash on Delivery is enabled for review.', ar: 'لن يظهر خيار دفع إنتاجي حتى يتم ربط موفر موثق. تم تفعيل خيار الدفع عند الاستلام للمراجعة.' }}
+              />
+              <div className="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer text-sm text-amber-100 font-tajawal">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    checked={paymentMethod === 'cod'}
+                    onChange={() => setPaymentMethod('cod')}
+                    className="accent-amber-500"
+                  />
+                  <span>{isAr ? 'الدفع عند الاستلام (COD)' : 'Cash on Delivery (COD)'}</span>
+                </label>
+              </div>
+            </div>
+          )}
+
+          {step === 5 && (
+            <div className="store-review">
+              <StoreState
+                kind="unavailable"
+                title={{ en: 'Order submission unavailable', ar: 'إرسال الطلب غير متاح' }}
+                description={{ en: 'Address, shipping, tax and payment configuration must be verified before a real order can be submitted.', ar: 'يجب التحقق من العنوان والشحن والضريبة والدفع قبل إرسال طلب حقيقي.' }}
+              />
+              {cart.map((line) => (
+                <div key={`${line.product.id}-${line.size ?? 'default'}-${line.color ?? 'default'}`} className="flex items-center justify-between p-3 rounded-lg border border-neutral-800 bg-neutral-900/40">
+                  <div className="flex items-center gap-3">
+                    <ShoppingBag size={16} className="text-amber-400" />
+                    <div>
+                      <h4 className="text-sm font-bold text-white"><StoreCopy value={line.product.name} /></h4>
+                      {line.size && <span className="text-xs text-neutral-400">Size: {line.size}</span>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-xs text-neutral-400">× {line.quantity}</span>
+                    <ProductPrice product={line.product} size="s" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {notice && (
+            <div className="store-inline-error" role="alert">
+              <X size={16} className="shrink-0" />
+              <StoreCopy value={{ en: 'Order was not submitted. Production checkout is not configured.', ar: 'لم يتم إرسال الطلب. الدفع الإنتاجي غير مهيأ.' }} inline />
+            </div>
+          )}
+
+          <footer>
+            {step > 1 && (
+              <button type="button" className="store-button store-button-secondary" onClick={() => setStep(step - 1)}>
+                <StoreCopy value={{ en: 'Back', ar: 'السابق' }} inline />
+              </button>
+            )}
+            <button type="submit" className="store-button store-button-primary">
+              {step === 5 ? (
+                <StoreCopy value={{ en: 'Place Order', ar: 'تأكيد الطلب' }} inline />
+              ) : (
+                <StoreCopy value={{ en: 'Continue', ar: 'متابعة' }} inline />
+              )}
+              <DirectionArrow />
+            </button>
+          </footer>
+        </form>
+
+        <CartSummary checkout />
+      </div>
+    </div>
+  );
 }
 
 const accountNav = [

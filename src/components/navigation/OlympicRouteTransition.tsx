@@ -20,6 +20,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { AppLogo } from '../brand/AppLogo';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 interface DestinationMeta {
   badge: { en: string; ar: string };
@@ -279,6 +280,7 @@ function getDestinationMeta(pathname: string): DestinationMeta {
 
 export function OlympicRouteTransition() {
   const location = useLocation();
+  const prefersReduced = useReducedMotion();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [activeMeta, setActiveMeta] = useState<DestinationMeta>(() =>
     getDestinationMeta(location.pathname)
@@ -294,20 +296,22 @@ export function OlympicRouteTransition() {
       return;
     }
 
-    // Only transition if path actually changed
+    // Only transition if path actually changed and user has not requested reduced motion
     if (prevPath.current !== location.pathname) {
       prevPath.current = location.pathname;
       const meta = getDestinationMeta(location.pathname);
       setActiveMeta(meta);
-      setIsTransitioning(true);
+      if (!prefersReduced) {
+        setIsTransitioning(true);
 
-      const timer = setTimeout(() => {
-        setIsTransitioning(false);
-      }, 420); // Fast, crisp, high-performance transition
+        const timer = setTimeout(() => {
+          setIsTransitioning(false);
+        }, 420); // Fast, crisp, high-performance transition
 
-      return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [location.pathname]);
+  }, [location.pathname, prefersReduced]);
 
   const IconComponent = activeMeta.icon;
 

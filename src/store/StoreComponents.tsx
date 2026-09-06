@@ -42,7 +42,15 @@ export function StorePreviewNotice() {
 
 export function ProductPrice({ product, size = 'm' }: { product: StoreProduct; size?: 's' | 'm' | 'l' }) {
   const formatter = new Intl.NumberFormat('en-AE', { style: 'currency', currency: product.currency, maximumFractionDigits: 2 });
-  return <strong className={`store-price store-price-${size}`}>{formatter.format(product.price)}</strong>;
+  const hasDiscount = Boolean(product.compareAtPrice && product.compareAtPrice > product.price);
+  return (
+    <span className={`store-price-group store-price-${size}`}>
+      <strong className="store-price-current">{formatter.format(product.price)}</strong>
+      {hasDiscount && (
+        <s className="store-price-compare" aria-label="Original price">{formatter.format(product.compareAtPrice!)}</s>
+      )}
+    </span>
+  );
 }
 
 export function ProductMedia({ product, hero = false, source = product.image }: { product: StoreProduct; hero?: boolean; source?: string }) {
@@ -57,6 +65,10 @@ export function ProductCard({ product, compact = false }: { product: StoreProduc
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.colors?.[0]?.en);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
   const [added, setAdded] = useState(false);
+
+  const discountPercent = product.compareAtPrice && product.compareAtPrice > product.price
+    ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
+    : 0;
 
   const handleQuickAdd = () => {
     addToCart(product, { quantity: 1, size: selectedSize, color: selectedColor });
@@ -88,6 +100,11 @@ export function ProductCard({ product, compact = false }: { product: StoreProduc
         <ProductMedia product={product} source={currentImage} />
       </Link>
       <div className="store-card-badges-row">
+        {discountPercent > 0 && (
+          <span className="store-product-badge store-badge-sale" aria-label={`Discount ${discountPercent}% | خصم ${discountPercent}%`}>
+            -{discountPercent}%
+          </span>
+        )}
         <span className="store-product-badge store-badge-olympic">
           <Sparkles size={11} aria-hidden="true" />
           <span>{badge.en}</span>

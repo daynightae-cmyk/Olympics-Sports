@@ -1,0 +1,175 @@
+/* ==========================================================================
+   UNITED OLYMPICS SPORTS — PUBLIC REDESIGN & VISUAL REBUILD STYLES
+   ========================================================================== */
+
+:root {
+  --uos-charcoal-950: #07080b;
+  --uos-charcoal-900: #0d0f14;
+  --uos-charcoal-800: #14171f;
+  --uos-charcoal-700: #1c212d;
+
+  --uos-ivory-50: #fdfbf7;
+  --uos-ivory-100: #f6f1e6;
+  --uos-ivory-200: #eae2d2;
+  --uos-ivory-300: #dad0bc;
+
+  --uos-gold-primary: #cba135;
+  --uos-gold-light: #dfb84b;
+  --uos-gold-bright: #f0cc66;
+  --uos-gold-dark: #9e7920;
+  --uos-gold-glow: rgba(203, 161, 53, 0.18);
+  --uos-gold-border: rgba(203, 161, 53, 0.28);
+}
+
+/* Responsive Focal Point Image System */
+.uos-responsive-img {
+  object-position: var(--focal-desktop, 50% 50%);
+}
+
+@media (max-width: 1024px) {
+  .uos-responsive-img {
+    object-position: var(--focal-tablet, var(--focal-desktop, 50% 50%));
+  }
+}
+
+@media (max-width: 640px) {
+  .uos-responsive-img {
+    object-position: var(--focal-mobile, var(--focal-tablet, 50% 50%));
+  }
+}
+
+/* Public Header Glass & Transition */
+.uos-public-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  width: 100%;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.uos-public-header.scrolled {
+  background-color: rgba(7, 8, 11, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(203, 161, 53, 0.2);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* Gold Gradient Button */
+.uos-btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, var(--uos-gold-light), var(--uos-gold-primary));
+  color: #0d0f14;
+  box-shadow: 0 4px 20px -2px rgba(203, 161, 53, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  min-height: 44px;
+}
+
+.uos-btn-gold:hover {
+  background: linear-gradient(135deg, var(--uos-gold-bright), var(--uos-gold-light));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -2px rgba(203, 161, 53, 0.5);
+  color: #000;
+}
+
+.uos-btn-gold:active {
+  transform: translateY(0);
+}
+
+/* Secondary Ghost / Outline Button */
+.uos-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f6f1e6;
+  border: 1px solid rgba(203, 161, 53, 0.35);
+  backdrop-filter: blur(8px);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  min-height: 44px;
+}
+
+.uos-btn-outline:hover {
+  background: rgba(203, 161, 53, 0.15);
+  border-color: var(--uos-gold-light);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+/* Refined Card Hover Effects */
+.uos-card-interactive {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.35s ease;
+}
+
+.uos-card-interactive:hover {
+  transform: translateY(-4px);
+  border-color: rgba(203, 161, 53, 0.45);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 25px -5px rgba(203, 161, 53, 0.15);
+}
+
+/* Badge / Pill styling */
+.uos-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.uos-pill-gold {
+  background: rgba(203, 161, 53, 0.12);
+  color: var(--uos-gold-light);
+  border: 1px solid rgba(203, 161, 53, 0.3);
+}
+
+/* Cinematic Charcoal Background Pattern */
+.uos-charcoal-mesh {
+  background-color: var(--uos-charcoal-950);
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(203, 161, 53, 0.04) 0%, transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(203, 161, 53, 0.03) 0%, transparent 40%);
+}
+
+/* Warm Ivory Section Styling */
+.uos-ivory-section {
+  background-color: #fbf8f2;
+  color: #1a1815;
+}
+
+.dark .uos-ivory-section {
+  background-color: #0f1218;
+  color: #f6f1e6;
+}
+
+/* Typography Enhancements */
+.font-tajawal {
+  font-family: 'Tajawal', 'Cairo', sans-serif;
+}
+
+/* Smooth Entrance Fade */
+@keyframes uosFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: uosFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

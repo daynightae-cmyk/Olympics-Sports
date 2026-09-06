@@ -1,190 +1,227 @@
-import { ArrowLeft, ArrowRight, Check, Dumbbell, ShieldCheck, Sparkles, Trophy, Users } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { BilingualText, bi } from '../../components/bilingual/BilingualText';
-import { Sports3DIcon, Sports3DStage } from '../../design/sports3d';
-import { basketballMediaAssets } from '../../data/media/basketball';
-import type { SportMediaAsset } from '../../domain/contracts';
-import '../../styles/basketball.css';
-
-const basketballMedia = Object.fromEntries(
-  basketballMediaAssets.map(asset => [asset.id, asset]),
-) as Record<string, SportMediaAsset>;
-
-function BasketballImage({ asset, priority = false, className = '' }: { asset: SportMediaAsset; priority?: boolean; className?: string }) {
-  return (
-    <img
-      className={`basketball-image ${className}`.trim()}
-      src={asset.url}
-      alt={`${asset.altEn} | ${asset.altAr}`}
-      width={1648}
-      height={928}
-      loading={priority ? 'eager' : 'lazy'}
-      fetchPriority={priority ? 'high' : 'auto'}
-      decoding="async"
-    />
-  );
-}
-
-const pillars = [
-  bi('Ball Handling', 'التحكم بالكرة'),
-  bi('Shooting', 'التصويب'),
-  bi('Passing', 'التمرير'),
-  bi('Footwork', 'حركة القدمين'),
-  bi('Decision Making', 'اتخاذ القرار'),
-  bi('Team Play', 'اللعب الجماعي'),
-  bi('Defence', 'الدفاع'),
-  bi('Endurance', 'التحمل'),
-];
+import { ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck, Trophy, Dumbbell, Target, Sparkles, Zap, Users } from 'lucide-react';
+import { UosImage } from '../../components/public/UosImage';
+import { useUiSettings } from '../../ui/theme/useUiSettings';
+import { Sports3DIcon } from '../../design/sports3d';
 
 export function BasketballPage() {
-  const [previewMessage, setPreviewMessage] = useState(false);
+  const { bilingualOrder } = useUiSettings();
+  const isAr = bilingualOrder === 'ar-first';
+  const ArrowIcon = isAr ? ArrowLeft : ArrowRight;
 
-  const submitInterest = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setPreviewMessage(true);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    setFormSubmitted(true);
   };
 
+  const pillars = [
+    {
+      icon: <Zap className="text-amber-400" size={22} />,
+      titleAr: 'التحكم بالكرة والمراوغة الديناميكية',
+      titleEn: 'Ball Handling & Dynamic Dribbling',
+      descAr: 'تطوير مهارة المحاورة بكلتا اليدين، وتغيير السرعة والاتجاه بثقة.',
+      descEn: 'Developing ambidextrous handles, rapid pace variations, and controlled directional changes.',
+    },
+    {
+      icon: <Target className="text-amber-400" size={22} />,
+      titleAr: 'دقة التصويب وتوافق الحركة',
+      titleEn: 'Shooting Mechanics & Form',
+      descAr: 'التركيز على ميكانيكا التصويب السليم من الثبات والحركة ومن مسافات متنوعة.',
+      descEn: 'Building sound shooting form, footwork setup, and consistent release mechanics.',
+    },
+    {
+      icon: <Users className="text-amber-400" size={22} />,
+      titleAr: 'قراءة الملعب واتخاذ القرار السريع',
+      titleEn: 'Court Vision & Fast Decision-Making',
+      descAr: 'تدريب اللاعب على الرؤية الشاملة للملعب، التمرير الذكي، واستغلال الثغرات.',
+      descEn: 'Cultivating court vision, crisp passing lanes, and split-second tactical decisions.',
+    },
+    {
+      icon: <Dumbbell className="text-amber-400" size={22} />,
+      titleAr: 'اللياقة اللاهوائية والارتقاء',
+      titleEn: 'Explosiveness & Vertical Jump',
+      descAr: 'تمارين نوعية لتعزيز قوة القفز، سرعة الانطلاق، والرشاقة الدفاعية.',
+      descEn: 'Plyometric and agility drills enhancing acceleration, lateral quickness, and vertical leap.',
+    },
+    {
+      icon: <ShieldCheck className="text-amber-400" size={22} />,
+      titleAr: 'الانضباط التكتيكي والدفاع الفردي',
+      titleEn: 'Tactical Discipline & Defensive Stance',
+      descAr: 'إتقان التمركز الدفاعي السليم، إغلاق زوايا التمرير، والمتابعة الهجومية والدفاعية.',
+      descEn: 'Mastering solid defensive stance, boxing out, and disciplined team rotation.',
+    },
+  ];
+
   return (
-    <div className="basketball-page">
-      <section className="basketball-hero">
-        <BasketballImage asset={basketballMedia['basketball-08']} priority />
-        <div className="basketball-hero-grid" aria-hidden="true" />
-        <div className="basketball-hero-shade" />
-        <div className="basketball-hero-content">
-          <Link className="basketball-back" to="/sports"><ArrowLeft size={16} /><BilingualText value={bi('All Sports', 'جميع الرياضات')} /></Link>
-          <Sports3DStage sport="basketball" variant="badge" label="Basketball identity | هوية كرة السلة"><Sports3DIcon sport="basketball" size="hero" decorative /></Sports3DStage>
-          <BilingualText className="basketball-kicker" value={bi('Basketball Program', 'برنامج كرة السلة')} icon={<Sparkles size={15} />} />
-          <h1><BilingualText value={bi('Move Fast. Think Faster.', 'تحرك بسرعة. وفكر أسرع.')} /></h1>
-          <p><BilingualText value={bi('Structured basketball training develops movement, coordination, decision-making, team awareness and confident execution.', 'يطور تدريب كرة السلة المنظم الحركة والتناسق واتخاذ القرار والوعي الجماعي والتنفيذ بثقة.')} /></p>
-          <div className="basketball-actions">
-            <a className="button primary" href="#basketball-training"><BilingualText value={bi('Explore Training', 'استكشف التدريب')} /><ArrowRight size={16} /></a>
-            <a className="button secondary" href="#basketball-interest"><BilingualText value={bi('Register Interest', 'سجل اهتمامك')} /><ArrowRight size={16} /></a>
+    <div className="uos-public-page bg-[#07080b] text-neutral-100 overflow-hidden">
+      
+      {/* 1. HERO SECTION (UOS_15_BASKETBALL_HERO) */}
+      <section className="relative min-h-[70vh] lg:min-h-[78vh] flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <UosImage
+            assetKey="UOS_15_BASKETBALL_HERO"
+            aspectRatio="auto"
+            priority
+            className="w-full h-full !rounded-none"
+            imageClassName="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-[#07080b]/75 backdrop-blur-[1px] z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#07080b] via-transparent to-[#07080b]/50 z-10" />
+        </div>
+
+        <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center space-y-6">
+          <Link
+            to="/sports"
+            className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors font-tajawal bg-black/40 px-3 py-1.5 rounded-full border border-amber-500/20"
+          >
+            <ArrowLeft size={14} className={isAr ? 'rotate-180' : ''} />
+            <span>{isAr ? 'العودة إلى جميع الرياضات' : 'Back to All Sports'}</span>
+          </Link>
+
+          <div className="flex justify-center">
+            <div className="p-3 rounded-2xl bg-black/60 backdrop-blur-md border border-amber-500/30">
+              <Sports3DIcon sport="basketball" size="lg" decorative />
+            </div>
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white font-tajawal leading-tight drop-shadow-lg">
+            {isAr ? 'مسار كرة السلة: سرعة، تصويب، وتناغم جماعي' : 'Basketball Pathway: Speed, Shooting, and Team Chemistry'}
+          </h1>
+
+          <p className="text-base sm:text-lg text-neutral-300 max-w-2xl mx-auto font-tajawal leading-relaxed">
+            {isAr
+              ? 'تطوير ردود الفعل السريعة، إتقان المراوغة والتصويب، وبناء التواصل الفعال على أرض الصالة.'
+              : 'Developing rapid reaction times, mastering ball-handling and shooting, and instilling dynamic team communication.'}
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+            <a href="#register-interest" className="uos-btn-gold w-full sm:w-auto">
+              <span>{isAr ? 'سجل اهتمامك بكرة السلة' : 'Register Interest'}</span>
+              <ArrowIcon size={16} />
+            </a>
+            <Link to="/programs" className="uos-btn-outline w-full sm:w-auto">
+              <span>{isAr ? 'عرض البرامج' : 'View Programs'}</span>
+              <ArrowIcon size={16} />
+            </Link>
           </div>
         </div>
       </section>
 
-      <section className="basketball-section basketball-pillars-section" id="basketball-training">
-        <div className="basketball-heading">
-          <BilingualText className="basketball-eyebrow" value={bi('Training Pillars', 'محاور التدريب')} />
-          <h2><BilingualText value={bi('Control the ball. Read the floor. Make the next decision.', 'تحكم بالكرة. اقرأ الملعب. واتخذ القرار التالي.')} /></h2>
-          <p><BilingualText value={bi('Basketball development combines technical repetition with movement, awareness and team responsibility.', 'يجمع تطوير كرة السلة بين التكرار الفني والحركة والوعي والمسؤولية الجماعية.')} /></p>
-        </div>
-        <div className="basketball-pillars">
-          {pillars.map((pillar, index) => <article key={pillar.en} className={index < 3 ? 'featured' : ''}><span>{String(index + 1).padStart(2, '0')}</span><h3><BilingualText value={pillar} /></h3></article>)}
+      {/* 2. TEAMWORK & DECISION MAKING (UOS_16_BASKETBALL_DECISION) */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <div className="lg:col-span-6 space-y-6">
+            <span className="uos-pill uos-pill-gold font-tajawal">
+              {isAr ? 'الرؤية والعمل الجماعي' : 'Vision & Team Play'}
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-tajawal leading-tight">
+              {isAr ? 'قراءة الملعب والتناغم السريع' : 'Court Vision & Cohesive Decision-Making'}
+            </h2>
+            <div className="space-y-4 text-neutral-300 text-sm sm:text-base font-tajawal leading-relaxed">
+              <p>
+                {isAr
+                  ? 'كرة السلة لعبة تعتمد على السرعة واتخاذ القرارات في أجزاء من الثانية. يركز برنامجنا على تدريب اللاعبين على قراءة تحركات الخصم، التحرك الفعال بدون كرة، وخلق المساحات المناسبة للتسجيل.'
+                  : 'Basketball is a game of lightning-fast decision-making. Our curriculum emphasizes reading opponent schemes, executing timely off-ball cuts, and creating optimal scoring opportunities.'}
+              </p>
+              <p>
+                {isAr
+                  ? 'يتعلم اللاعبون أهمية التمرير الإضافي والتواصل الصوتي المستمر كركيزة أساسية للنجاح الجماعي.'
+                  : 'Players learn the value of the extra pass, floor spacing, and vocal communication as pillars of team victory.'}
+              </p>
+            </div>
+          </div>
+
+          <div className="lg:col-span-6 relative">
+            <UosImage
+              assetKey="UOS_16_BASKETBALL_DECISION"
+              aspectRatio="3/2"
+              withLightbox
+              className="rounded-2xl shadow-2xl border border-amber-500/30 overflow-hidden"
+            />
+            <div className="mt-3 text-center text-xs text-neutral-400 font-tajawal">
+              {isAr ? 'تدريبات جماعية متقدمة على التمرير وحركة الفريق' : 'Cohesive youth drills focusing on passing lanes and court motion'}
+            </div>
+          </div>
+
         </div>
       </section>
 
-      <section className="basketball-section basketball-technique basketball-dark-band">
-        <div className="basketball-technique-media">
-          <BasketballImage asset={basketballMedia['basketball-01']} />
-          <BasketballImage asset={basketballMedia['basketball-02']} />
-        </div>
-        <div className="basketball-copy">
-          <BilingualText className="basketball-eyebrow" value={bi('Technique Coaching', 'التدريب الفني')} />
-          <h2><BilingualText value={bi('Details create repeatable skill.', 'التفاصيل تصنع مهارة قابلة للتكرار.')} /></h2>
-          <p><BilingualText value={bi('Coach-led correction connects shooting form, ball control, posture and purposeful repetition without making unverified claims about staff credentials.', 'يربط التصحيح بقيادة المدرب بين أسلوب التصويب والتحكم بالكرة ووضعية الجسم والتكرار الهادف دون تقديم ادعاءات غير موثقة حول مؤهلات الطاقم.')} /></p>
-          <div className="basketball-mini-points">
-            <BilingualText value={bi('Shooting form', 'أسلوب التصويب')} /><BilingualText value={bi('Ball control', 'التحكم بالكرة')} /><BilingualText value={bi('Posture', 'وضعية الجسم')} />
+      {/* 3. 5 CORE PILLARS */}
+      <section className="py-20 bg-[#0a0b0e] border-y border-neutral-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-2">
+            <span className="uos-pill uos-pill-gold font-tajawal">
+              {isAr ? 'أسس كرة السلة' : 'Core Basketball Pillars'}
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-tajawal">
+              {isAr ? 'خمس ركائز للتفوق في الصالة المغطاة' : 'Five Pillars for On-Court Excellence'}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {pillars.map((item, idx) => (
+              <div key={idx} className="p-6 rounded-2xl bg-[#0d0f14] border border-neutral-800 hover:border-amber-500/30 transition-colors space-y-3">
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 w-fit">
+                  {item.icon}
+                </div>
+                <h3 className="text-lg font-bold text-white font-tajawal">
+                  {isAr ? item.titleAr : item.titleEn}
+                </h3>
+                <p className="text-sm text-neutral-400 font-tajawal leading-relaxed">
+                  {isAr ? item.descAr : item.descEn}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="basketball-section basketball-children">
-        <div className="basketball-copy">
-          <BilingualText className="basketball-eyebrow" value={bi('Children Development', 'تطوير الأطفال')} />
-          <h2><BilingualText value={bi('Confidence starts with coordinated movement.', 'تبدأ الثقة بحركة متناسقة.')} /></h2>
-          <p><BilingualText value={bi('Progressive child-focused drills can build ball familiarity, listening, movement and confidence through safe repetition. Exact age groups and availability are shown only when verified.', 'يمكن للتدريبات المتدرجة الموجهة للأطفال بناء الألفة مع الكرة والاستماع والحركة والثقة من خلال تكرار آمن، ولا تُعرض الفئات العمرية أو الإتاحة الفعلية إلا بعد التحقق.')} /></p>
-        </div>
-        <div className="basketball-stacked-media">
-          <BasketballImage asset={basketballMedia['basketball-03']} />
-          <BasketballImage asset={basketballMedia['basketball-06']} />
-        </div>
-      </section>
+      {/* 4. REGISTER INTEREST FORM */}
+      <section id="register-interest" className="py-20 bg-[#0a0b0e]">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 space-y-2">
+            <span className="uos-pill uos-pill-gold font-tajawal">
+              {isAr ? 'التسجيل والاستفسار' : 'Registration & Inquiry'}
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-tajawal">
+              {isAr ? 'انضم إلى تدريبات كرة السلة' : 'Join Basketball Training'}
+            </h2>
+            <p className="text-xs sm:text-sm text-neutral-400 font-tajawal">
+              {isAr ? 'سجل بياناتك للتواصل معك وتحديد موعد جلسة التقييم والتدريب.' : 'Register for age group availability and skill assessment scheduling.'}
+            </p>
+          </div>
 
-      <section className="basketball-section basketball-girls basketball-dark-band">
-        <div className="basketball-heading">
-          <BilingualText className="basketball-eyebrow" value={bi('Girls Development', 'تطوير الفتيات')} />
-          <h2><BilingualText value={bi('A dedicated pathway deserves visible space.', 'المسار المخصص يستحق حضورًا واضحًا.')} /></h2>
-          <p><BilingualText value={bi('Female-coach-led training is presented as a dedicated development experience focused on passing, defensive positioning, ball handling and confident participation. No timetable or branch availability is invented.', 'يُعرض التدريب بقيادة المدربة كتجربة تطوير مخصصة تركز على التمرير والتمركز الدفاعي والتحكم بالكرة والمشاركة بثقة، دون اختلاق جداول أو إتاحة للفروع.')} /></p>
-        </div>
-        <div className="basketball-girls-grid">
-          <BasketballImage asset={basketballMedia['basketball-04']} />
-          <BasketballImage asset={basketballMedia['basketball-10']} />
-        </div>
-      </section>
+          <form onSubmit={handleSubmit} className="p-8 rounded-2xl bg-[#0d0f14] border border-amber-500/20 space-y-4 shadow-xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-neutral-300 font-tajawal mb-1.5">{isAr ? 'الاسم الكامل' : 'Full Name'}</label>
+                <input required type="text" placeholder={isAr ? 'الاسم' : 'Name'} className="w-full px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 text-sm font-tajawal" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-neutral-300 font-tajawal mb-1.5">{isAr ? 'البريد الإلكتروني' : 'Email Address'}</label>
+                <input required type="email" placeholder="example@domain.com" className="w-full px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400 text-sm font-sans" />
+              </div>
+            </div>
 
-      <section className="basketball-section basketball-performance">
-        <div className="basketball-performance-media">
-          <BasketballImage asset={basketballMedia['basketball-05']} />
-          <BasketballImage asset={basketballMedia['basketball-09']} />
-        </div>
-        <div className="basketball-copy">
-          <BilingualText className="basketball-eyebrow" value={bi('Youth Performance', 'أداء الناشئين')} />
-          <h2><BilingualText value={bi('Speed stays useful only when it stays controlled.', 'تبقى السرعة مفيدة عندما تبقى تحت السيطرة.')} /></h2>
-          <p><BilingualText value={bi('Dribbling and cone work can connect controlled speed, change of direction, ball protection and live decision-making under increasing pressure.', 'يمكن لتدريبات المراوغة والأقماع ربط السرعة المنضبطة وتغيير الاتجاه وحماية الكرة واتخاذ القرار المباشر تحت ضغط متزايد.')} /></p>
-        </div>
-      </section>
+            <button type="submit" className="uos-btn-gold w-full !py-3 !text-sm">
+              <span>{isAr ? 'إرسال طلب الانضمام' : 'Submit Registration'}</span>
+              <ArrowIcon size={16} />
+            </button>
 
-      <section className="basketball-section basketball-team basketball-dark-band">
-        <BasketballImage asset={basketballMedia['basketball-07']} />
-        <div className="basketball-copy">
-          <BilingualText className="basketball-eyebrow" value={bi('Train Together', 'تدربوا معًا')} />
-          <h2><BilingualText value={bi('Spacing, communication and shared responsibility.', 'التمركز والتواصل والمسؤولية المشتركة.')} /></h2>
-          <p><BilingualText value={bi('Group training develops team habits through movement, communication, spacing and responsibility without presenting a fictional roster or competition record.', 'يطور التدريب الجماعي عادات الفريق من خلال الحركة والتواصل والتمركز والمسؤولية دون عرض قائمة لاعبين أو سجل منافسات غير حقيقي.')} /></p>
-        </div>
-      </section>
-
-      <section className="basketball-section basketball-game-like">
-        <div className="basketball-copy">
-          <BilingualText className="basketball-eyebrow" value={bi('Game-Like Intensity', 'كثافة تحاكي اللعب')} />
-          <h2><BilingualText value={bi('Technique must survive the next decision.', 'يجب أن تصمد المهارة أمام القرار التالي.')} /></h2>
-          <p><BilingualText value={bi('Game-like training moves from isolated technique toward live attack, defence and decision-making scenarios. It does not imply official league or tournament participation.', 'ينتقل التدريب الذي يحاكي اللعب من المهارة المنفردة إلى مواقف الهجوم والدفاع واتخاذ القرار المباشر، دون أن يعني مشاركة رسمية في دوري أو بطولة.')} /></p>
-          <div className="basketball-metric-row"><BilingualText value={bi('Shooting', 'التصويب')} /><BilingualText value={bi('Passing', 'التمرير')} /><BilingualText value={bi('Decision Making', 'اتخاذ القرار')} /><BilingualText value={bi('Endurance', 'التحمل')} /></div>
-        </div>
-        <BasketballImage asset={basketballMedia['basketball-08']} />
-      </section>
-
-      <section className="basketball-section basketball-gallery-section">
-        <div className="basketball-heading">
-          <BilingualText className="basketball-eyebrow" value={bi('Basketball Gallery', 'معرض كرة السلة')} />
-          <h2><BilingualText value={bi('Ten verified basketball visuals. Ten independent assets.', 'عشر صور كرة سلة معتمدة. عشرة أصول مستقلة.')} /></h2>
-          <p><BilingualText value={bi('Every user-supplied image remains its own website asset. No collage, stock replacement or generated substitute is used.', 'تبقى كل صورة مقدمة من المستخدم أصلًا مستقلًا داخل الموقع، دون كولاج أو استبدال بصور مخزنة أو بدائل مولدة.')} /></p>
-        </div>
-        <div className="basketball-gallery">
-          {basketballMediaAssets.map(asset => (
-            <figure key={asset.id}>
-              <BasketballImage asset={asset} />
-              <figcaption><span>{String(asset.order).padStart(2, '0')}</span><BilingualText value={bi(asset.altEn, asset.altAr)} /></figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
-
-      <section className="basketball-section basketball-interest" id="basketball-interest">
-        <div className="basketball-interest-card">
-          <BilingualText className="basketball-eyebrow" value={bi('Register Interest', 'سجل اهتمامك')} />
-          <h2><BilingualText value={bi('Interested in the Basketball pathway?', 'مهتم بمسار كرة السلة؟')} /></h2>
-          <p><BilingualText value={bi('This Phase 1 form is an interface preview only. It does not send, store or register information.', 'هذا النموذج في المرحلة الأولى معاينة للواجهة فقط، ولا يرسل أو يحفظ أو يسجل المعلومات.')} /></p>
-          <form onSubmit={submitInterest} className="basketball-interest-form">
-            <label><BilingualText value={bi('Name', 'الاسم')} /><input required name="name" autoComplete="name" placeholder="Name | الاسم" /></label>
-            <label><BilingualText value={bi('Email', 'البريد الإلكتروني')} /><input required name="email" type="email" autoComplete="email" placeholder="Email | البريد الإلكتروني" /></label>
-            <label><BilingualText value={bi('Preferred Training Focus', 'محور التدريب المفضل')} /><select name="focus" defaultValue=""><option value="" disabled>Select focus | اختر المحور</option><option value="ball-handling">Ball Handling | التحكم بالكرة</option><option value="shooting">Shooting | التصويب</option><option value="team-play">Team Play | اللعب الجماعي</option><option value="general">General Development | تطوير عام</option></select></label>
-            <button className="button primary" type="submit"><BilingualText value={bi('Preview Registration', 'معاينة التسجيل')} /><ArrowRight size={16} /></button>
+            {formSubmitted && (
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-amber-300 text-xs font-tajawal animate-fade-in">
+                <CheckCircle2 size={18} className="shrink-0" />
+                <span>{isAr ? 'تم استلام طلبك! سيقوم الكادر التدريبي بالتواصل معك قريباً.' : 'Thank you! We will get in touch with you shortly.'}</span>
+              </div>
+            )}
           </form>
-          {previewMessage && <p className="basketball-preview-note"><Check size={15} /><BilingualText value={bi('Preview only — no information was submitted or saved.', 'معاينة فقط — لم يتم إرسال أو حفظ أي معلومات.')} /></p>}
         </div>
       </section>
 
-      <section className="basketball-related">
-        <div><Trophy /><BilingualText value={bi('Related Sports Navigation', 'التنقل إلى الرياضات المرتبطة')} /></div>
-        <nav aria-label="Related sports | الرياضات المرتبطة">
-          <Link to="/sports"><BilingualText value={bi('All Sports', 'جميع الرياضات')} /><ArrowRight size={15} /></Link>
-          <Link to="/sports/football"><BilingualText value={bi('Football', 'كرة القدم')} /><ArrowRight size={15} /></Link>
-          <Link to="/sports/swimming"><BilingualText value={bi('Swimming', 'السباحة')} /><ArrowRight size={15} /></Link>
-          <Link to="/programs"><BilingualText value={bi('Programs', 'البرامج')} /><ArrowRight size={15} /></Link>
-        </nav>
-      </section>
     </div>
   );
 }

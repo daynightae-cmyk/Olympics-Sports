@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowRight, Flame, Sparkles, Trophy } from 'lucide-react';
 import { AppLogo } from '../brand/AppLogo';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 interface OlympicLuxurySplashProps {
   onComplete: () => void;
@@ -16,9 +17,7 @@ export function OlympicLuxurySplash({
 }: OlympicLuxurySplashProps) {
   const [progress, setProgress] = useState(0);
   const [statusIndex, setStatusIndex] = useState(0);
-  const [reducedMotion] = useState(
-    () => typeof window !== 'undefined' && (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false)
-  );
+  const reducedMotion = useReducedMotion();
 
   const statusPhases = [
     { en: 'Igniting Olympic Spirit...', ar: 'إيقاد الشعلة الأولمبية...' },

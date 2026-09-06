@@ -97,7 +97,9 @@ export function applyUiSettingsToDocument(
   root.dataset.bilingualOrder = settings.bilingualOrder;
   root.dataset.density = settings.density;
   root.dataset.fontScale = settings.fontScale;
-  root.dataset.motion = settings.motion;
+  const prefersReduced = typeof window !== 'undefined' && (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false);
+  const isReduced = settings.motion === 'reduced' || (settings.motion === 'system' && prefersReduced);
+  root.dataset.reducedMotion = isReduced ? 'true' : 'false';
   root.dataset.sidebarDefault = settings.sidebarDefault;
   root.style.colorScheme = mode;
 

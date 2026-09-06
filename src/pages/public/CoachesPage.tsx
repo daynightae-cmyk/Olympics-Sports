@@ -1,24 +1,184 @@
-import { ArrowRight, ClipboardCheck, MessageSquareText, Target, UsersRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { BilingualText, bi } from '../../components/bilingual/BilingualText';
-import { PreviewBadge } from '../../components/owner-demo/OwnerDemoVisuals';
-import { getSportMediaByUsage, getSportPreviewMedia } from '../../data/media';
-import '../../styles/owner-demo.css';
-
-const roles = [
-  { id: 'football', name: bi('Football Coaching', 'تدريب كرة القدم'), focus: bi('Technique, awareness and team development', 'التقنية والوعي وتطوير الفريق') },
-  { id: 'swimming', name: bi('Swimming Coaching', 'تدريب السباحة'), focus: bi('Water confidence, technique and endurance', 'الثقة في الماء والتقنية والتحمل') },
-  { id: 'basketball', name: bi('Basketball Coaching', 'تدريب كرة السلة'), focus: bi('Movement, decisions and team play', 'الحركة والقرارات واللعب الجماعي') },
-];
+import { ArrowLeft, ArrowRight, Sparkles, ShieldCheck, Heart, Target, Award, Users, BookOpen } from 'lucide-react';
+import { UosImage } from '../../components/public/UosImage';
+import { useUiSettings } from '../../ui/theme/useUiSettings';
 
 export function CoachesPage() {
-  return <div className="od-public-page od-coaches-page">
-    <section className="od-coaches-hero"><div><PreviewBadge /><span className="od-kicker"><BilingualText value={bi('Coaching Experience', 'تجربة التدريب')} /></span><h1><BilingualText value={bi('Guidance that turns practice into progress', 'توجيه يحول التدريب إلى تقدم')} /></h1><p><BilingualText value={bi('A role-based visual showcase of how coaching, evaluation and athlete development connect across United Olympics Sports.', 'عرض بصري قائم على الأدوار يوضح كيف يرتبط التدريب والتقييم وتطوير الرياضي داخل يونايتد أوليمبيكس سبورت.')} /></p></div><div className="od-coach-flow-visual"><div><Target /><BilingualText value={bi('Observe', 'الملاحظة')} /></div><ArrowRight /><div><ClipboardCheck /><BilingualText value={bi('Evaluate', 'التقييم')} /></div><ArrowRight /><div><MessageSquareText /><BilingualText value={bi('Guide', 'التوجيه')} /></div></div></section>
+  const { bilingualOrder } = useUiSettings();
+  const isAr = bilingualOrder === 'ar-first';
+  const ArrowIcon = isAr ? ArrowLeft : ArrowRight;
 
-    <section className="od-coach-role-section"><div className="od-section-heading"><span><BilingualText value={bi('Sport Coaching', 'التدريب حسب الرياضة')} /></span><h2><BilingualText value={bi('The coaching role, visualized by discipline', 'دور المدرب بصورة واضحة لكل رياضة')} /></h2></div><div className="od-coach-role-grid">{roles.map(role => { const media = getSportMediaByUsage(role.id, 'coaching') ?? getSportMediaByUsage(role.id, 'coach-child') ?? getSportPreviewMedia(role.id); return <article key={role.id}>{media && <img src={media.url} alt={`${media.altEn} | ${media.altAr}`} width={1648} height={928} loading="lazy" decoding="async" />}<div className="od-role-shade" /><div className="od-role-copy"><PreviewBadge label={bi('Coach Profile Preview', 'معاينة ملف المدرب')} /><h3><BilingualText value={role.name} /></h3><small><BilingualText value={bi('Specialization', 'التخصص')} /></small><p><BilingualText value={role.focus} /></p><div className="od-role-meta"><span><BilingualText value={bi('Training Approach', 'منهج التدريب')} /></span><span><BilingualText value={bi('Athlete Focus', 'التركيز على اللاعب')} /></span></div></div></article>; })}</div></section>
+  const pillars = [
+    {
+      icon: <Heart className="text-amber-400" size={24} />,
+      titleAr: 'التعليم والتحفيز الإيجابي',
+      titleEn: 'Positive Instruction & Encouragement',
+      descAr: 'بناء الثقة في قدرات اللاعب وتصحيح الأخطاء بأسلوب بناء يحفز على المحاولة والتكرار دون خوف.',
+      descEn: 'Building confidence and offering constructive feedback that motivates continuous effort without fear of mistakes.',
+    },
+    {
+      icon: <BookOpen className="text-amber-400" size={24} />,
+      titleAr: 'المنهجية العلمية التراكمية',
+      titleEn: 'Cumulative Scientific Progression',
+      descAr: 'خطط تدريبية مقسمة لمراحل محددة ترتكز على التوافق العصبي والنمو البدني المناسب لكل مرحلة عمرية.',
+      descEn: 'Curricula structured into clear milestones aligned with neuromuscular and physical growth phases.',
+    },
+    {
+      icon: <Target className="text-amber-400" size={24} />,
+      titleAr: 'التقييم المستمر والمتابعة الفردية',
+      titleEn: 'Continuous Assessment & Tracking',
+      descAr: 'ملاحظة دقيقة لتطور المهارات الحركية والجاهزية، مع تقديم توجيهات فردية مستمرة لكل رياضي.',
+      descEn: 'Detailed observation of technical motor skills and individualized guidance for every athlete.',
+    },
+    {
+      icon: <ShieldCheck className="text-amber-400" size={24} />,
+      titleAr: 'التربية الرياضية والانضباط',
+      titleEn: 'Sports Character & Discipline',
+      descAr: 'غرس قيم احترام القوانين والمدرب والزملاء، والالتزام بالمواعيد كركيزة لبناء الشخصية المتوازنة.',
+      descEn: 'Instilling respect for rules, coaches, and peers, alongside punctual commitment for holistic character.',
+    },
+  ];
 
-    <section className="od-coaching-system"><div className="od-section-heading"><span><BilingualText value={bi('Coach-to-Player Flow', 'رحلة المدرب مع اللاعب')} /></span><h2><BilingualText value={bi('A development loop the owner can see', 'حلقة تطوير واضحة يمكن للمالك تصورها')} /></h2></div><div className="od-system-grid"><article><UsersRound /><h3><BilingualText value={bi('Training Context', 'سياق التدريب')} /></h3><p><BilingualText value={bi('Sport, group and development focus provide the coaching context.', 'الرياضة والمجموعة ومحور التطور تشكل سياق التدريب.')} /></p></article><article><ClipboardCheck /><h3><BilingualText value={bi('Structured Evaluation', 'تقييم منظم')} /></h3><p><BilingualText value={bi('Sport-aware metrics turn observation into a consistent evaluation view.', 'المؤشرات الخاصة بكل رياضة تحول الملاحظة إلى رؤية تقييم متسقة.')} /></p></article><article><MessageSquareText /><h3><BilingualText value={bi('Feedback Experience', 'تجربة الملاحظات')} /></h3><p><BilingualText value={bi('Strengths and focus areas are presented clearly to support the next training step.', 'تظهر نقاط القوة والتركيز بوضوح لدعم الخطوة التدريبية التالية.')} /></p></article></div></section>
+  return (
+    <div className="uos-public-page bg-[#07080b] text-neutral-100 overflow-hidden">
+      
+      {/* 1. HERO SECTION (UOS_08_PROGRESS_STORY) */}
+      <section className="relative min-h-[60vh] lg:min-h-[70vh] flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <UosImage
+            assetKey="UOS_08_PROGRESS_STORY"
+            aspectRatio="auto"
+            priority
+            className="w-full h-full !rounded-none"
+            imageClassName="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-[#07080b]/80 backdrop-blur-[1px] z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#07080b] via-transparent to-[#07080b]/50 z-10" />
+        </div>
 
-    <section className="od-owner-cta"><div><h2><BilingualText value={bi('Explore the training experience', 'استكشف تجربة التدريب')} /></h2><p><BilingualText value={bi('Public coach identities are intentionally not invented in this preview.', 'لا يتم اختلاق هويات مدربين عامة في هذه المعاينة.')} /></p></div><Link className="button primary" to="/contact"><BilingualText value={bi('Contact Us', 'تواصل معنا')} /><ArrowRight /></Link></section>
-  </div>;
+        <div className="relative z-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center space-y-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/60 border border-amber-500/30 backdrop-blur-md mb-2 shadow-xl">
+            <Sparkles size={14} className="text-amber-400" />
+            <span className="text-xs sm:text-sm font-bold tracking-wide text-amber-300 font-tajawal">
+              {isAr ? 'فلسفة التدريب — United Olympics Sports' : 'Coaching Philosophy — United Olympics Sports'}
+            </span>
+          </div>
+
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white font-tajawal leading-tight drop-shadow-lg">
+            {isAr ? 'مدربون موجهون، بيئة منضبطة' : 'Guiding Coaches, Disciplined Environment'}
+          </h1>
+
+          <p className="text-base sm:text-lg text-neutral-300 max-w-2xl mx-auto font-tajawal leading-relaxed">
+            {isAr
+              ? 'التدريب ليس إعطاء تعليمات عابرة، بل غرس عادات الانضباط، التحفيز الإيجابي، وبناء علاقة ثقة تحفز اللاعب على بلوغ أفضل مستوياته.'
+              : 'Coaching is not merely instruction—it is instilling discipline, positive reinforcement, and a foundation of trust.'}
+          </p>
+        </div>
+      </section>
+
+      {/* 2. 4 COACHING PILLARS */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-2xl mx-auto mb-16 space-y-2">
+          <span className="uos-pill uos-pill-gold font-tajawal">
+            {isAr ? 'مبادئ كادرنا التدريبي' : 'Our Guiding Principles'}
+          </span>
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-tajawal">
+            {isAr ? 'أربع ركائز توجه كل حصة تدريبية' : 'Four Pillars Guiding Every Session'}
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {pillars.map((item, idx) => (
+            <div
+              key={idx}
+              className="p-8 rounded-2xl bg-[#0d0f14] border border-amber-500/20 hover:border-amber-500/50 transition-colors flex flex-col sm:flex-row gap-6 items-start"
+            >
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 shrink-0">
+                {item.icon}
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-white font-tajawal">
+                  {isAr ? item.titleAr : item.titleEn}
+                </h3>
+                <p className="text-sm text-neutral-400 font-tajawal leading-relaxed">
+                  {isAr ? item.descAr : item.descEn}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3. ATHLETE-COACH-PARENT ECOSYSTEM */}
+      <section className="py-20 bg-[#0a0b0e] border-y border-neutral-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            <div className="lg:col-span-6 space-y-6">
+              <span className="uos-pill uos-pill-gold font-tajawal">
+                {isAr ? 'منظومة النجاح' : 'Success Ecosystem'}
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-tajawal leading-tight">
+                {isAr ? 'تكامل ثلاثي بين اللاعب، المدرب، وولي الأمر' : 'A Triangle of Athlete, Coach, and Parent'}
+              </h2>
+              <div className="space-y-4 text-neutral-300 text-sm sm:text-base font-tajawal leading-relaxed">
+                <p>
+                  {isAr
+                    ? 'نؤمن في United Olympics Sports بأن النجاح الحقيقي للناشئ يتحقق عندما تتكامل جهود المدرب الفنية مع الدعم والتشجيع الأسري في بيئة تتسم بالشفافية والتواصل المستمر.'
+                    : 'We believe genuine youth athletic progress is achieved when coaching expertise harmonizes with parental support and transparent communication.'}
+                </p>
+                <p>
+                  {isAr
+                    ? 'نوفر تقارير متابعة دورية عبر البوابات الإلكترونية لإطلاع أولياء الأمور على نسب الحضور، التطور المهاري، وملاحظات الكادر الفني.'
+                    : 'We provide structured progress tracking via our digital portals, keeping parents informed about attendance, skill milestones, and coach feedback.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-6 rounded-2xl bg-[#0d0f14] border border-neutral-800 space-y-2">
+                <Users className="text-amber-400" size={24} />
+                <h4 className="font-bold text-white text-base font-tajawal">{isAr ? 'تواصل شفاف' : 'Transparent Channels'}</h4>
+                <p className="text-xs text-neutral-400 font-tajawal">{isAr ? 'ملاحظات دورية حول الأداء والانضباط' : 'Regular feedback on performance and behavior'}</p>
+              </div>
+              <div className="p-6 rounded-2xl bg-[#0d0f14] border border-neutral-800 space-y-2">
+                <ShieldCheck className="text-amber-400" size={24} />
+                <h4 className="font-bold text-white text-base font-tajawal">{isAr ? 'بيئة آمنة' : 'Safe Environment'}</h4>
+                <p className="text-xs text-neutral-400 font-tajawal">{isAr ? 'حماية ورعاية كاملة لكل رياضي ناشئ' : 'Complete safety and safeguarding protocols'}</p>
+              </div>
+              <div className="p-6 rounded-2xl bg-[#0d0f14] border border-neutral-800 space-y-2">
+                <Award className="text-amber-400" size={24} />
+                <h4 className="font-bold text-white text-base font-tajawal">{isAr ? 'تقدير الجهد' : 'Effort Recognition'}</h4>
+                <p className="text-xs text-neutral-400 font-tajawal">{isAr ? 'الاحتفاء بالالتزام والتطور المستمر' : 'Celebrating commitment and growth milestones'}</p>
+              </div>
+              <div className="p-6 rounded-2xl bg-[#0d0f14] border border-neutral-800 space-y-2">
+                <Target className="text-amber-400" size={24} />
+                <h4 className="font-bold text-white text-base font-tajawal">{isAr ? 'أهداف فردية' : 'Personal Goals'}</h4>
+                <p className="text-xs text-neutral-400 font-tajawal">{isAr ? 'خطة تلائم إمكانيات وجاهزية كل لاعب' : 'Plans tailored to individual readiness'}</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* 4. CLOSING CTA */}
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+        <h2 className="text-2xl sm:text-4xl font-extrabold text-white font-tajawal">
+          {isAr ? 'تعرف على برامجنا الرياضية المتخصصة' : 'Explore Our Specialized Sports Programs'}
+        </h2>
+        <div className="flex justify-center gap-4 pt-4">
+          <Link to="/programs" className="uos-btn-gold">
+            <span>{isAr ? 'عرض البرامج' : 'View Programs'}</span>
+            <ArrowIcon size={16} />
+          </Link>
+          <Link to="/contact" className="uos-btn-outline">
+            <span>{isAr ? 'تواصل معنا' : 'Contact Us'}</span>
+            <ArrowIcon size={16} />
+          </Link>
+        </div>
+      </section>
+
+    </div>
+  );
 }

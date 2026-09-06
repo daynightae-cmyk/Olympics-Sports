@@ -18,6 +18,7 @@ export interface StoreProduct {
   category: string;
   type: BilingualText;
   price: number;
+  compareAtPrice?: number;
   currency: string;
   sku: string;
   badge?: 'new' | 'featured' | string;
