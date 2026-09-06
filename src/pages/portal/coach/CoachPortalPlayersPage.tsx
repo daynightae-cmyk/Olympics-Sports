@@ -1,0 +1,1 @@
+export { CoachPortalPlayersPage } from './CoachPortalWorkspaces';

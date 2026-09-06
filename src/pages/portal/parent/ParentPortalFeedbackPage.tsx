@@ -1,0 +1,1 @@
+export { ParentPortalFeedbackPage } from './ParentPortalWorkspaces';

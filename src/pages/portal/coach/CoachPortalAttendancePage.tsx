@@ -1,0 +1,1 @@
+export { CoachPortalAttendancePage } from './CoachPortalWorkspaces';

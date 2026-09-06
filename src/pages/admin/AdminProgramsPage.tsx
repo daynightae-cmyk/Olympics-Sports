@@ -1,0 +1,1 @@
+export { AdminProgramsPage } from './AdminDirectoryWorkspaces';

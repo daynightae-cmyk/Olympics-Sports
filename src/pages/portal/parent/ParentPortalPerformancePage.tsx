@@ -1,0 +1,1 @@
+export { ParentPortalPerformancePage } from './ParentPortalWorkspaces';

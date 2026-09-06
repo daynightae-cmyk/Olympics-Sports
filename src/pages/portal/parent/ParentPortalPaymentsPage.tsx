@@ -1,0 +1,1 @@
+export { ParentPortalPaymentsPage } from './ParentPortalWorkspaces';
