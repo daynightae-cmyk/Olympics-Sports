@@ -4,6 +4,8 @@ import { UosImage } from '../../components/public/UosImage';
 import { MediaRegistry } from '../../data/media/publicMediaRegistry';
 import { useUiSettings } from '../../ui/theme/useUiSettings';
 import { SportCard } from '../../components/public/cards';
+import { TestimonialsSection } from '../../components/public/TestimonialsSection';
+import { FaqSection } from '../../components/public/FaqSection';
 import type { UosSportSlug, Sport3DId } from '../../design/sports3d/sports3d.types';
 
 export function HomePage() {
@@ -347,7 +349,13 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* 6. CLOSING CTA (UOS_20_CLOSING_CTA) */}
+      {/* 6. TESTIMONIALS & ATHLETE SUCCESS STORIES */}
+      <TestimonialsSection />
+
+      {/* 7. FREQUENTLY ASKED QUESTIONS */}
+      <FaqSection />
+
+      {/* 8. CLOSING CTA (UOS_20_CLOSING_CTA) */}
       <section className="relative py-24 lg:py-32 overflow-hidden border-t border-amber-500/20">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">

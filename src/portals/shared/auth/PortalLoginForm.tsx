@@ -28,7 +28,38 @@ export function PortalLoginForm({ onSuccess, showPreviewSelect, previewOptions, 
         onSuccess(result.user.uid, result.user);
       }
     } catch (err: any) {
-      setError({ en: err.message || 'Authentication failed.', ar: 'فشلت المصادقة.' });
+      const code = err?.code || '';
+      if (code === 'auth/popup-closed-by-user') {
+        setError({
+          en: 'Sign-in was cancelled (popup closed). Please try again.',
+          ar: 'تم إغلاق نافذة تسجيل الدخول. يمكنك المحاولة مرة أخرى.',
+        });
+      } else if (code === 'auth/popup-blocked') {
+        setError({
+          en: 'Sign-in popup was blocked by your browser. Please allow popups for this site.',
+          ar: 'تم حظر النافذة المنبثقة بواسطة المتصفح. يُرجى السماح بالنوافذ المنبثقة لإكمال الدخول.',
+        });
+      } else if (code === 'auth/cancelled-popup-request') {
+        setError({
+          en: 'Another sign-in request is already in progress.',
+          ar: 'يوجد طلب تسجيل دخول آخر قيد المعالجة حالياً.',
+        });
+      } else if (code === 'auth/network-request-failed') {
+        setError({
+          en: 'Network connection error. Please check your internet connectivity.',
+          ar: 'تعذر الاتصال بالشبكة. يُرجى التحقق من اتصال الإنترنت.',
+        });
+      } else if (code === 'auth/unauthorized-domain') {
+        setError({
+          en: 'This domain is not authorized in Firebase Auth settings.',
+          ar: 'هذا النطاق غير مصرح به في إعدادات مصادقة Firebase.',
+        });
+      } else {
+        setError({
+          en: err.message || 'Authentication failed. Please try again.',
+          ar: 'فشلت عملية المصادقة. يرجى المحاولة مرة أخرى.',
+        });
+      }
     } finally {
       setLoading(false);
     }

@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { usePlayerSession } from '../../../portals/player/PlayerSessionContext';
 import { BilingualText, bi } from '../../../components/bilingual/BilingualText';
+import { AthleticProgressCharts } from '../../../portals/player/components/AthleticProgressCharts';
+import { PerformanceTrendsDashboard } from '../../../portals/player/components/PerformanceTrendsDashboard';
 
 export function PlayerPortalPerformancePage() {
   const { player, sport, metrics, overallScore } = usePlayerSession();
@@ -327,6 +329,22 @@ export function PlayerPortalPerformancePage() {
           </div>
         </div>
       </div>
+
+      {/* Performance Trends Dashboard Suite */}
+      <PerformanceTrendsDashboard
+        playerNameEn={player.nameEn}
+        playerNameAr={player.nameAr}
+        membershipId={player.id}
+        sportName={sport?.name.en}
+        tier={player.level.en}
+      />
+
+      {/* Recharts Longitudinal Growth Analytics */}
+      <AthleticProgressCharts
+        playerName={player.nameEn}
+        sportName={sport?.name}
+        level={player.level}
+      />
     </div>
   );
 }

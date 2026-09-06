@@ -11,6 +11,10 @@ import {
   Check,
   ChevronRight,
   Info,
+  Sun,
+  Moon,
+  Laptop,
+  Sparkles,
 } from 'lucide-react';
 import { usePlayerSession } from '../../../portals/player/PlayerSessionContext';
 import { BilingualText, bi } from '../../../components/bilingual/BilingualText';
@@ -18,8 +22,9 @@ import { useUiSettings } from '../../../ui/theme/useUiSettings';
 
 export function PlayerPortalSettingsPage() {
   const { player, parent, allPlayers, switchPlayer, logout } = usePlayerSession();
-  const { bilingualOrder, appearance, setSetting } = useUiSettings();
+  const { bilingualOrder, appearance, resolvedTheme, setAppearance, setSetting } = useUiSettings();
   const navigate = useNavigate();
+  const isAr = bilingualOrder === 'ar-first';
 
   if (!player) return null;
 
@@ -73,6 +78,108 @@ export function PlayerPortalSettingsPage() {
 
       {/* Settings Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Theme & Visual Appearance Mode Toggle */}
+        <div className="athlete-glass-card p-6 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-white/10">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <Sun size={16} className="text-amber-400" />
+              <BilingualText value={bi('Theme & Visual Mode', 'السمة والمظهر البصري')} />
+            </h3>
+            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-300">
+              {appearance === 'light'
+                ? (isAr ? 'الوضع النهاري' : 'Light Mode Active')
+                : appearance === 'dark'
+                ? (isAr ? 'الوضع الليلي' : 'Dark Mode Active')
+                : (isAr ? 'تلقائي النظام' : 'System Synced')}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            {/* Dark Mode Button */}
+            <button
+              type="button"
+              onClick={() => setAppearance('dark')}
+              className={`p-3.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
+                appearance === 'dark'
+                  ? 'bg-amber-400 text-black font-black border-amber-400 shadow-md shadow-amber-400/20'
+                  : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'
+              }`}
+            >
+              <Moon size={18} className={appearance === 'dark' ? 'text-black' : 'text-amber-400'} />
+              <div>
+                <span className="text-xs font-bold block"><BilingualText value={bi('Dark', 'ليلي')} /></span>
+                <span className="text-[9px] opacity-75"><BilingualText value={bi('Night Deck', 'الوضع الداكن')} /></span>
+              </div>
+            </button>
+
+            {/* Light Mode Button */}
+            <button
+              type="button"
+              onClick={() => setAppearance('light')}
+              className={`p-3.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
+                appearance === 'light'
+                  ? 'bg-amber-400 text-black font-black border-amber-400 shadow-md shadow-amber-400/20'
+                  : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'
+              }`}
+            >
+              <Sun size={18} className={appearance === 'light' ? 'text-black' : 'text-amber-400'} />
+              <div>
+                <span className="text-xs font-bold block"><BilingualText value={bi('Light', 'نهاري')} /></span>
+                <span className="text-[9px] opacity-75"><BilingualText value={bi('Clean Light', 'الوضع الفاتح')} /></span>
+              </div>
+            </button>
+
+            {/* System Auto Button */}
+            <button
+              type="button"
+              onClick={() => setAppearance('system')}
+              className={`p-3.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
+                appearance === 'system'
+                  ? 'bg-amber-400 text-black font-black border-amber-400 shadow-md shadow-amber-400/20'
+                  : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'
+              }`}
+            >
+              <Laptop size={18} className={appearance === 'system' ? 'text-black' : 'text-amber-400'} />
+              <div>
+                <span className="text-xs font-bold block"><BilingualText value={bi('System', 'تلقائي')} /></span>
+                <span className="text-[9px] opacity-75"><BilingualText value={bi('OS Auto', 'حسب الجهاز')} /></span>
+              </div>
+            </button>
+          </div>
+
+          {/* Quick Toggle Switch Bar */}
+          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-white/5 text-xs">
+            <span className="text-slate-300 font-semibold flex items-center gap-1.5">
+              <Sparkles size={14} className="text-amber-400" />
+              <BilingualText value={bi('Quick Theme Switcher', 'التبديل السريع بين الليلي والنهاري')} />
+            </span>
+            <button
+              type="button"
+              onClick={() => setAppearance(resolvedTheme === 'dark' ? 'light' : 'dark')}
+              className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-slate-700 data-[checked=true]:bg-amber-400"
+              data-checked={resolvedTheme === 'dark'}
+              role="switch"
+              aria-checked={resolvedTheme === 'dark'}
+            >
+              <span
+                aria-hidden="true"
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  resolvedTheme === 'dark' ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            <BilingualText
+              value={bi(
+                'Customize contrast and atmosphere across the entire Olympic athlete portal deck.',
+                'خصص التباين والسمة اللونية لجميع شاشات ومخططات بوابة الرياضي.'
+              )}
+            />
+          </p>
+        </div>
+
         {/* Language & Regional Settings */}
         <div className="athlete-glass-card p-6 space-y-4">
           <h3 className="text-sm font-bold text-white flex items-center gap-2 pb-3 border-b border-white/10">

@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Phone, Mail, MapPin, Sparkles, Mes
 import { useUiSettings } from '../../ui/theme/useUiSettings';
 import { formatUaePhoneNumber } from '../../utils/phoneMask';
 import { contactSchema } from '../../utils/validation';
+import { Toast } from '../../components/ui/Toast';
 
 const DEVELOPER_WHATSAPP =
   "https://wa.me/971503281920?text=Hello%20Eng.%20Sadek%20Elgazar%2C%20I%20would%20like%20to%20start%20a%20new%20project%20with%20KNOuX.%20%7C%20%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%20%D9%85.%20%D8%B5%D8%A7%D8%AF%D9%82%20%D8%A7%D9%84%D8%AC%D8%B2%D8%A7%D8%B1%D8%8C%20%D8%A3%D9%88%D8%AF%20%D8%A7%D9%84%D8%A8%D8%AF%D8%A1%20%D9%81%D9%8A%20%D9%85%D8%B4%D8%B1%D9%88%D8%B9%20%D8%AC%D8%AF%D9%8A%D8%AF%20%D9%85%D8%B9%20KNOuX.";
@@ -13,6 +14,7 @@ export function ContactPage() {
   const ArrowIcon = isAr ? ArrowLeft : ArrowRight;
 
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -61,6 +63,7 @@ export function ContactPage() {
     } else {
       setErrors({});
       setFormSubmitted(true);
+      setShowToast(true);
       setFormData({
         name: '',
         phone: '',
@@ -73,7 +76,22 @@ export function ContactPage() {
   };
 
   return (
-    <div className="uos-public-page bg-[#07080b] text-neutral-100 overflow-hidden">
+    <div className="uos-public-page bg-[#07080b] text-neutral-100 overflow-hidden relative">
+      <Toast
+        isOpen={showToast}
+        type="success"
+        isAr={isAr}
+        duration={5000}
+        onClose={() => setShowToast(false)}
+        title={{
+          en: 'Message Sent Successfully',
+          ar: 'تم إرسال الرسالة بنجاح',
+        }}
+        message={{
+          en: 'Thank you for reaching out! Our coaching & coordination staff will get back to you within 24 hours.',
+          ar: 'شكراً لتواصلك معنا! سيقوم فريق التنسيق والتدريب بالتواصل معك خلال 24 ساعة عمل.',
+        }}
+      />
       
       {/* 1. HERO BANNER */}
       <section className="relative py-20 lg:py-28 border-b border-neutral-800 bg-radial-vignette">

@@ -7,6 +7,8 @@ import { PlayerAthleteIdentityCard } from '../../../portals/player/components/Pl
 import { PlayerEmptyState } from '../../../portals/player/components/PlayerEmptyState';
 import { PlayerSessionSummaryCard } from '../../../portals/player/components/PlayerSessionSummaryCard';
 import { TrainingLog } from '../../../portals/player/components/TrainingLog';
+import { DailyActivityTracker } from '../../../portals/player/components/DailyActivityTracker';
+import { AthleticProgressCharts } from '../../../portals/player/components/AthleticProgressCharts';
 import { useTrainingLog } from '../../../portals/player/hooks/useTrainingLog';
 import { selectPlayerOverallScore, selectUpcomingSession } from '../../../portals/player/foundation/playerSelectors';
 
@@ -71,6 +73,22 @@ export function PlayerPortalOverviewPage() {
 
         <TrainingLog entries={training.entries} weeklyGoal={training.weeklyGoal} currentWeekMinutes={training.currentWeekMinutes} onAddEntry={training.addEntry} onDeleteEntry={training.deleteEntry} onUpdateGoal={training.updateWeeklyGoal} />
       </div>
+
+      {/* Daily Activity Tracker Component */}
+      <DailyActivityTracker
+        playerId={player.id}
+        playerNameEn={player.nameEn}
+        playerNameAr={player.nameAr}
+        membershipId={player.id}
+        sportName={sport?.name.en}
+        tier={player.level.en}
+      />
+
+      <AthleticProgressCharts
+        playerName={player.nameEn}
+        sportName={sport?.name}
+        level={player.level}
+      />
 
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <QuickLink to="/player/attendance" icon={<Activity size={17} />} title={bi('Attendance', 'الحضور')} />

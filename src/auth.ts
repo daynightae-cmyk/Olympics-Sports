@@ -3,57 +3,24 @@ import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, User 
 import firebaseConfig from '../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+export const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-const SCOPES = [
-  "https://mail.google.com/",
-  "https://www.googleapis.com/auth/gmail.addons.current.action.compose",
-  "https://www.googleapis.com/auth/gmail.addons.current.message.action",
-  "https://www.googleapis.com/auth/gmail.addons.current.message.metadata",
-  "https://www.googleapis.com/auth/gmail.addons.current.message.readonly",
-  "https://www.googleapis.com/auth/gmail.compose",
-  "https://www.googleapis.com/auth/gmail.insert",
-  "https://www.googleapis.com/auth/gmail.labels",
-  "https://www.googleapis.com/auth/gmail.metadata",
-  "https://www.googleapis.com/auth/gmail.modify",
-  "https://www.googleapis.com/auth/gmail.readonly",
-  "https://www.googleapis.com/auth/gmail.send",
-  "https://www.googleapis.com/auth/gmail.settings.basic",
-  "https://www.googleapis.com/auth/gmail.settings.sharing",
-  "https://www.googleapis.com/auth/documents",
-  "https://www.googleapis.com/auth/documents.readonly",
-  "https://www.googleapis.com/auth/drive",
-  "https://www.googleapis.com/auth/drive.file",
-  "https://www.googleapis.com/auth/drive.readonly",
-  "https://www.googleapis.com/auth/forms.body",
-  "https://www.googleapis.com/auth/forms.body.readonly",
-  "https://www.googleapis.com/auth/forms.responses.readonly",
-  "https://www.googleapis.com/auth/presentations",
-  "https://www.googleapis.com/auth/presentations.readonly",
-  "https://www.googleapis.com/auth/spreadsheets",
-  "https://www.googleapis.com/auth/spreadsheets.readonly",
-  "https://www.googleapis.com/auth/tasks",
-  "https://www.googleapis.com/auth/tasks.readonly"
-];
-
-SCOPES.forEach(scope => provider.addScope(scope));
+// Standard configuration for Google Sign In
+provider.setCustomParameters({
+  prompt: 'select_account'
+});
 
 let isSigningIn = false;
 let cachedAccessToken: string | null = null;
 
 export const initAuth = (
-  onAuthSuccess?: (user: User, token: string) => void,
+  onAuthSuccess?: (user: User, token?: string) => void,
   onAuthFailure?: () => void
 ) => {
   return onAuthStateChanged(auth, async (user: User | null) => {
     if (user) {
-      if (cachedAccessToken) {
-        if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken);
-      } else if (!isSigningIn) {
-        cachedAccessToken = null;
-        if (onAuthFailure) onAuthFailure();
-      }
+      if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken || '');
     } else {
       cachedAccessToken = null;
       if (onAuthFailure) onAuthFailure();
@@ -61,19 +28,16 @@ export const initAuth = (
   });
 };
 
-export const googleSignIn = async (): Promise<{ user: User; accessToken: string } | null> => {
+export const googleSignIn = async (): Promise<{ user: User; accessToken?: string } | null> => {
   try {
     isSigningIn = true;
     const result = await signInWithPopup(auth, provider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
-    if (!credential?.accessToken) {
-      throw new Error('Failed to get access token from Firebase Auth');
-    }
-
-    cachedAccessToken = credential.accessToken;
-    return { user: result.user, accessToken: cachedAccessToken };
+    cachedAccessToken = credential?.accessToken || null;
+    return { user: result.user, accessToken: cachedAccessToken || undefined };
   } catch (error: any) {
-    console.error('Sign in error:', error);
+    // If user closed the popup window, rethrow or allow caller to handle gracefully
+    console.warn('Firebase sign-in outcome/error:', error?.code || error?.message || error);
     throw error;
   } finally {
     isSigningIn = false;
@@ -88,3 +52,4 @@ export const logout = async () => {
   await auth.signOut();
   cachedAccessToken = null;
 };
+
