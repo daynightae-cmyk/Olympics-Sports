@@ -49,8 +49,24 @@
     <meta property="og:image" content="/brand/united-olympics-sports-logo.png">
     <meta name="twitter:image" content="/brand/united-olympics-sports-logo.png">
 </head>
-  <body class="font-sans antialiased overflow-x-hidden">
-    <div id="root"></div>
+  <body class="font-sans antialiased overflow-x-hidden" style="background-color: #07090e;">
+    <div id="root">
+      <div id="app-preloader" style="position: fixed; inset: 0; background: #07090e; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <div style="position: relative; width: 72px; height: 72px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center;">
+          <div style="position: absolute; inset: -8px; border: 2px solid rgba(212, 175, 55, 0.2); border-top-color: #d4af37; border-radius: 50%; animation: uos-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;"></div>
+          <img src="/brand/united-olympics-sports-logo.png" alt="United Olympics Sports" style="width: 52px; height: 52px; object-fit: contain;" />
+        </div>
+        <div style="color: #f3ce5a; font-size: 13px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px;">
+          United Olympics Sports
+        </div>
+        <div style="color: #94a3b8; font-size: 11px; letter-spacing: 0.05em;">
+          يونايتد أوليمبيكس سبورت
+        </div>
+        <style>
+          @keyframes uos-spin { to { transform: rotate(360deg); } }
+        </style>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

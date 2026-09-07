@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, AlertCircle, Info, X, Sparkles } from 'lucide-react';
 
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 export interface ToastProps {
   id?: string;
@@ -61,13 +61,15 @@ export function Toast({
                 ? 'bg-[#0b1017]/95 border-amber-500/40 text-neutral-100 shadow-amber-500/10'
                 : type === 'error'
                 ? 'bg-[#180d0d]/95 border-red-500/40 text-neutral-100 shadow-red-500/10'
+                : type === 'warning'
+                ? 'bg-[#191307]/95 border-amber-500/50 text-neutral-100 shadow-amber-500/15'
                 : 'bg-[#0d1117]/95 border-blue-500/40 text-neutral-100 shadow-blue-500/10'
             }`}
           >
             {/* Ambient subtle glow */}
             <div
               className={`absolute -top-10 -right-10 w-28 h-28 rounded-full blur-2xl pointer-events-none opacity-30 ${
-                type === 'success' ? 'bg-amber-400' : type === 'error' ? 'bg-red-400' : 'bg-blue-400'
+                type === 'success' ? 'bg-amber-400' : type === 'error' ? 'bg-red-400' : type === 'warning' ? 'bg-amber-500' : 'bg-blue-400'
               }`}
             />
 
@@ -78,11 +80,14 @@ export function Toast({
                     ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
                     : type === 'error'
                     ? 'bg-red-500/15 text-red-400 border border-red-500/30'
+                    : type === 'warning'
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
                     : 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
                 }`}
               >
                 {type === 'success' && <CheckCircle2 size={20} className="stroke-[2.5]" />}
                 {type === 'error' && <AlertCircle size={20} className="stroke-[2.5]" />}
+                {type === 'warning' && <AlertCircle size={20} className="stroke-[2.5]" />}
                 {type === 'info' && <Info size={20} className="stroke-[2.5]" />}
               </div>
 

@@ -613,7 +613,12 @@ export function DailyActivityTracker({
                 >
                   <CheckCircle2 size={15} />
                   <span>
-                    <BilingualText value={bi('Training activity logged and synced successfully!', 'تم تسجيل وحفظ النشاط التدريبي بنجاح!')} />
+                    <BilingualText
+                      value={bi(
+                        'Activity saved locally on device (offline) — cloud sync pending backend connection',
+                        'تم حفظ النشاط التدريبي محلياً على الجهاز (دون اتصال) — المزامنة السحابية بانتظار اتصال الخادم'
+                      )}
+                    />
                   </span>
                 </motion.div>
               )}

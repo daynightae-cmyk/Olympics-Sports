@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck, Trophy, Dumbbell, Target, Sparkles, Zap, Heart } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck, Trophy, Dumbbell, Target, Sparkles, Zap, Heart, AlertTriangle } from 'lucide-react';
 import { UosImage } from '../../components/public/UosImage';
 import { useUiSettings } from '../../ui/theme/useUiSettings';
 import { Sports3DIcon } from '../../design/sports3d';
@@ -251,9 +251,26 @@ export function SportConceptPage({ sportId }: SportConceptPageProps) {
             </button>
 
             {formSubmitted && (
-              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-amber-300 text-xs font-tajawal animate-fade-in">
-                <CheckCircle2 size={18} className="shrink-0" />
-                <span>{isAr ? 'تم استلام طلبك بنجاح! سنتواصل معك في أقرب وقت.' : 'Thank you! We will reach out shortly with schedule details.'}</span>
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/40 space-y-2 text-amber-200 text-xs font-tajawal animate-fade-in">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="block text-amber-300 font-bold mb-0.5">
+                      {isAr ? 'لم يتم الإرسال — خدمة الخادم غير موصلة بعد (معاينة)' : 'Not Sent — Server Service Not Connected (Preview)'}
+                    </strong>
+                    <p className="text-neutral-300 leading-relaxed">
+                      {isAr
+                        ? 'نموذج الاستفسار قيد المعاينة التشغيلية ولم يتم ربطه بخادم بعد. للتواصل الفعلي المباشر، يُرجى الانتقال إلى صفحة التواصل المعتمدة.'
+                        : 'Inquiry form is in preview mode and not yet connected to a dispatch backend. For direct verified communication, please visit the contact page.'}
+                    </p>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-amber-500/20">
+                  <Link to="/contact" className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-bold">
+                    <span>{isAr ? 'الانتقال إلى صفحة التواصل الرسمية' : 'Go to Official Contact Page'}</span>
+                    <ArrowIcon size={13} />
+                  </Link>
+                </div>
               </div>
             )}
           </form>

@@ -168,6 +168,15 @@ export function AthleticProgressCharts({
               )}
             />
           </p>
+          <div className="mt-2.5 inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-tajawal">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <BilingualText
+              value={bi(
+                'Architecture Simulation (Preview) — Trajectory values illustrate UI layout awaiting live biometric telemetry sync.',
+                'محاكاة معمارية (معاينة) — المنحنيات المعروضة نموذج توضيحي بانتظار ربط الحساسات وأجهزة القياس الحركية الفعلية.'
+              )}
+            />
+          </div>
         </div>
 
         {/* View & Period Selectors */}

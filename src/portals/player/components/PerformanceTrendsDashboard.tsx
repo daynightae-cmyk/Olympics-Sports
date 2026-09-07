@@ -239,6 +239,15 @@ export function PerformanceTrendsDashboard({
               )}
             />
           </p>
+          <div className="mt-2.5 inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-tajawal">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <BilingualText
+              value={bi(
+                'Architecture Simulation (Preview) — Historical dataset is an architectural demonstration awaiting coach logging & sensor stream.',
+                'محاكاة معمارية (معاينة) — البيانات التاريخية نموذج توضيحي بانتظار تفعيل مدخلات المدرب والمزامنة الحية للحساسات.'
+              )}
+            />
+          </div>
         </div>
 
         {/* View mode & Period Selectors */}

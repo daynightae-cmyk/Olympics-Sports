@@ -1261,14 +1261,21 @@ export function CheckoutPage() {
                 <StoreCopy value={{ en: 'Back', ar: 'السابق' }} inline />
               </button>
             )}
-            <button type="submit" className="store-button store-button-primary">
-              {step === 5 ? (
-                <StoreCopy value={{ en: 'Place Order', ar: 'تأكيد الطلب' }} inline />
-              ) : (
+            {step === 5 ? (
+              <button
+                type="button"
+                disabled
+                className="store-button store-button-primary opacity-60 cursor-not-allowed"
+                title={isAr ? 'إرسال الطلب غير متاح — بانتظار ربط بوابة الدفع' : 'Order placement unavailable — Pending payment gateway'}
+              >
+                <StoreCopy value={{ en: 'Order Placement Disabled (Preview)', ar: 'إرسال الطلب غير متاح (معاينة)' }} inline />
+              </button>
+            ) : (
+              <button type="submit" className="store-button store-button-primary">
                 <StoreCopy value={{ en: 'Continue', ar: 'متابعة' }} inline />
-              )}
-              <DirectionArrow />
-            </button>
+                <DirectionArrow />
+              </button>
+            )}
           </footer>
         </form>
 
@@ -1336,6 +1343,15 @@ export function OrdersPage() {
 
   return (
     <AccountShell title={{ en: 'My Orders', ar: 'طلباتي' }}>
+      <div style={{ marginBottom: '14px', padding: '10px 14px', borderRadius: '10px', background: 'rgba(212, 175, 55, 0.08)', border: '1px solid rgba(212, 175, 55, 0.25)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#f3ce5a' }}>
+        <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#f3ce5a', flexShrink: 0 }} />
+        <StoreCopy
+          value={{
+            en: 'Sample Demonstration Orders (Preview) — Verified purchases will synchronize from database once production account integration is activated.',
+            ar: 'سجل طلبات تجريبي توضيحي (معاينة) — ستظهر المشتريات الفعلية الموثقة تلقائياً فور ربط الحسابات وقاعدة البيانات الإنتاجية.',
+          }}
+        />
+      </div>
       <OrderProgressTrackerCard />
       <div className="store-order-tabs" role="tablist">
         {tabs.map(([id, en, ar]) => (

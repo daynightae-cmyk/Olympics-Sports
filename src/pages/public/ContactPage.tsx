@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle2, Phone, Mail, MapPin, Sparkles, MessageCircle, Clock, ShieldCheck, ArrowUpRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Phone, Mail, MapPin, Sparkles, MessageCircle, Clock, ShieldCheck, ArrowUpRight, AlertTriangle } from 'lucide-react';
 import { useUiSettings } from '../../ui/theme/useUiSettings';
 import { formatUaePhoneNumber } from '../../utils/phoneMask';
 import { contactSchema } from '../../utils/validation';
@@ -79,17 +79,17 @@ export function ContactPage() {
     <div className="uos-public-page bg-[#07080b] text-neutral-100 overflow-hidden relative">
       <Toast
         isOpen={showToast}
-        type="success"
+        type="warning"
         isAr={isAr}
-        duration={5000}
+        duration={6000}
         onClose={() => setShowToast(false)}
         title={{
-          en: 'Message Sent Successfully',
-          ar: 'تم إرسال الرسالة بنجاح',
+          en: 'Not Sent — Server Service Not Connected',
+          ar: 'لم يتم الإرسال — خدمة الخادم غير موصلة بعد',
         }}
         message={{
-          en: 'Thank you for reaching out! Our coaching & coordination staff will get back to you within 24 hours.',
-          ar: 'شكراً لتواصلك معنا! سيقوم فريق التنسيق والتدريب بالتواصل معك خلال 24 ساعة عمل.',
+          en: 'In this preview environment, form backend is not connected yet. Please contact us directly via WhatsApp or Email.',
+          ar: 'في هذه البيئة التجريبية، خدمة الخادم غير موصلة بعد. يُرجى التواصل معنا مباشرة عبر واتساب أو البريد الإلكتروني.',
         }}
       />
       
@@ -324,9 +324,38 @@ export function ContactPage() {
               </button>
 
               {formSubmitted && (
-                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-amber-300 text-xs font-tajawal animate-fade-in">
-                  <CheckCircle2 size={18} className="shrink-0" />
-                  <span>{isAr ? 'شكراً لتواصلك معنا! تم استلام رسالتك وسيتم الرد عليك في أقرب وقت.' : 'Thank you! Your message has been received and our team will get in touch shortly.'}</span>
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/40 space-y-3 text-amber-200 text-xs font-tajawal animate-fade-in">
+                  <div className="flex items-start gap-2.5">
+                    <AlertTriangle size={18} className="text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="block text-amber-300 font-bold text-sm mb-1">
+                        {isAr ? 'لم يتم الإرسال — خدمة الخادم غير موصلة بعد (معاينة)' : 'Not Sent — Server Service Not Connected (Preview)'}
+                      </strong>
+                      <p className="text-neutral-300 leading-relaxed">
+                        {isAr
+                          ? 'خدمة معالجة استمارات الموقع غير مربوطة بخادم بريدي في هذه النسخة التجريبية. للتواصل الفوري الفعلي، يُرجى استخدام قنوات التواصل المباشرة المعتمدة:'
+                          : 'Server form dispatch endpoint is not connected yet in this preview build. For immediate assistance, please use our direct verified channels:'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-amber-500/20 flex flex-wrap gap-2">
+                    <a
+                      href={DEVELOPER_WHATSAPP}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-600/40 transition-colors text-[11px] font-bold no-underline"
+                    >
+                      <MessageCircle size={13} />
+                      <span>{isAr ? 'محادثة واتساب المباشرة' : 'Direct WhatsApp'}</span>
+                    </a>
+                    <a
+                      href="mailto:contact@unitedolympicssports.com"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 border border-white/20 text-slate-200 hover:bg-white/15 transition-colors text-[11px] font-bold no-underline"
+                    >
+                      <Mail size={13} />
+                      <span>{isAr ? 'إرسال بريد إلكتروني' : 'Direct Email'}</span>
+                    </a>
+                  </div>
                 </div>
               )}
             </form>

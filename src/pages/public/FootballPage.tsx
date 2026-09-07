@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck, Trophy, Dumbbell, Target, Sparkles, CircleDot, Users } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, ShieldCheck, Trophy, Dumbbell, Target, Sparkles, CircleDot, Users, AlertTriangle } from 'lucide-react';
 import { UosImage } from '../../components/public/UosImage';
 import { useUiSettings } from '../../ui/theme/useUiSettings';
 import { Sports3DIcon } from '../../design/sports3d';
@@ -267,9 +267,26 @@ export function FootballPage() {
             </button>
 
             {formSubmitted && (
-              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-amber-300 text-xs font-tajawal animate-fade-in">
-                <CheckCircle2 size={18} className="shrink-0" />
-                <span>{isAr ? 'تم استلام طلبك بنجاح! سيقوم فريقنا بالتواصل معك لتنسيق موعد التقييم.' : 'Thank you! Your interest has been registered. Our team will contact you shortly.'}</span>
+              <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/40 space-y-2 text-amber-200 text-xs font-tajawal animate-fade-in">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="block text-amber-300 font-bold mb-0.5">
+                      {isAr ? 'لم يتم الإرسال — خدمة الخادم غير موصلة بعد (معاينة)' : 'Not Sent — Server Service Not Connected (Preview)'}
+                    </strong>
+                    <p className="text-neutral-300 leading-relaxed">
+                      {isAr
+                        ? 'نموذج التسجيل قيد المعاينة التشغيلية ولم يتم ربطه بخادم بعد. للتسجيل الفعلي، يُرجى الانتقال إلى صفحة التواصل المباشرة.'
+                        : 'Registration form is in preview mode and not yet connected to a dispatch backend. For real registration, please visit the verified contact channels.'}
+                    </p>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-amber-500/20">
+                  <Link to="/contact" className="inline-flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-bold">
+                    <span>{isAr ? 'الانتقال إلى قنوات التواصل الرسمية' : 'Go to Official Contact Channels'}</span>
+                    <ArrowIcon size={13} />
+                  </Link>
+                </div>
               </div>
             )}
           </form>

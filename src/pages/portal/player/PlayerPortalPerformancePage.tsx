@@ -19,15 +19,11 @@ export function PlayerPortalPerformancePage() {
 
   if (!player) return null;
 
-  const radarData = useMemo(() => {
-    // Filter out metrics that have no current value to handle sparse data
-    const activeMetrics = metrics.filter((m) => m.current?.value !== undefined);
-    const count = activeMetrics.length;
+  const evaluatedSkillsCount = useMemo(() => {
+    return metrics.filter((m) => typeof m.current?.value === 'number').length;
+  }, [metrics]);
 
-    // If fewer than 3 metrics have values, drawing a polygon radar might not make sense or we just draw it anyway.
-    // We will draw it anyway for consistency, but using 0 for missing values if we keep all metrics.
-    // The instruction says "handle sparse data without injecting fake values".
-    // Let's use all metrics, but if value is missing, it's 0.
+  const radarData = useMemo(() => {
     const fullCount = metrics.length;
     if (fullCount === 0) return null;
 
@@ -36,8 +32,9 @@ export function PlayerPortalPerformancePage() {
 
     const points = metrics.map((m, idx) => {
       const angle = (Math.PI * 2 * idx) / fullCount - Math.PI / 2;
-      const val = m.current?.value ?? 0;
-      const radius = maxRadius * (val / 100);
+      const hasValue = typeof m.current?.value === 'number';
+      const val = hasValue ? m.current!.value : null;
+      const radius = hasValue ? maxRadius * (val! / 100) : 0;
       const x = center + Math.cos(angle) * radius;
       const y = center + Math.sin(angle) * radius;
 
@@ -52,6 +49,7 @@ export function PlayerPortalPerformancePage() {
         lx,
         ly,
         value: val,
+        hasValue,
         name: m.definition.name,
       };
     });
@@ -122,7 +120,9 @@ export function PlayerPortalPerformancePage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/10">
           <div className="athlete-stat-pill">
             <span><BilingualText value={bi('Evaluated Skills', 'المهارات المقيمة')} /></span>
-            <strong className="text-white text-xl font-bold">{metrics.length}</strong>
+            <strong className="text-white text-xl font-bold">
+              {evaluatedSkillsCount} <span className="text-xs text-slate-400 font-normal">/ {metrics.length}</span>
+            </strong>
           </div>
           <div className="athlete-stat-pill">
             <span><BilingualText value={bi('Sport Domain', 'التخصص الرياضي')} /></span>
@@ -204,22 +204,34 @@ export function PlayerPortalPerformancePage() {
                     {/* Skill Point Circles */}
                     {radarData.points.map((p, i) => (
                       <g key={i}>
-                        <circle
-                          cx={p.x}
-                          cy={p.y}
-                          r="4"
-                          fill="#f3ce5a"
-                          stroke="#07090e"
-                          strokeWidth="2"
-                        />
+                        {p.hasValue ? (
+                          <circle
+                            cx={p.x}
+                            cy={p.y}
+                            r="4"
+                            fill="#f3ce5a"
+                            stroke="#07090e"
+                            strokeWidth="2"
+                          />
+                        ) : (
+                          <circle
+                            cx={p.x}
+                            cy={p.y}
+                            r="3.5"
+                            fill="none"
+                            stroke="#64748b"
+                            strokeDasharray="2 2"
+                            strokeWidth="1.5"
+                          />
+                        )}
                         <text
                           x={p.lx}
                           y={p.ly}
                           textAnchor="middle"
                           dominantBaseline="middle"
-                          fill="#cbd5e1"
+                          fill={p.hasValue ? '#cbd5e1' : '#64748b'}
                           fontSize="9"
-                          fontWeight="600"
+                          fontWeight={p.hasValue ? '600' : '400'}
                           className="select-none"
                         >
                           {p.name.en}
@@ -262,10 +274,12 @@ export function PlayerPortalPerformancePage() {
 
               <div className="space-y-4">
                 {metrics.map((m) => {
-                  const currentVal = m.current?.value ?? 0;
-                  const prevVal = m.previous?.value ?? 0;
-                  const delta = currentVal - prevVal;
-                  const pct = Math.min(100, Math.round((currentVal / 100) * 100));
+                  const hasCurrent = typeof m.current?.value === 'number';
+                  const hasPrev = typeof m.previous?.value === 'number';
+                  const currentVal = hasCurrent ? m.current!.value : null;
+                  const prevVal = hasPrev ? m.previous!.value : null;
+                  const delta = (hasCurrent && hasPrev) ? currentVal! - prevVal! : null;
+                  const pct = hasCurrent ? Math.min(100, Math.round((currentVal! / 100) * 100)) : 0;
 
                   return (
                     <div key={m.definition.id} className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-2">
@@ -281,13 +295,21 @@ export function PlayerPortalPerformancePage() {
 
                         <div className="text-right flex items-center gap-2">
                           <div>
-                            <span className="font-mono font-bold text-amber-400 text-sm">
-                              {currentVal}
-                            </span>
-                            <span className="text-[10px] text-slate-500">/100</span>
+                            {hasCurrent ? (
+                              <>
+                                <span className="font-mono font-bold text-amber-400 text-sm">
+                                  {currentVal}
+                                </span>
+                                <span className="text-[10px] text-slate-500">/100</span>
+                              </>
+                            ) : (
+                              <span className="text-xs text-slate-400 italic font-mono">
+                                — <span className="text-[10px] not-italic text-slate-500">(<BilingualText value={bi('Not evaluated', 'غير مقيّم')} />)</span>
+                              </span>
+                            )}
                           </div>
 
-                          {delta !== 0 && (
+                          {delta !== null && delta !== 0 && (
                             <span
                               className={`text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 ${
                                 delta > 0
@@ -299,15 +321,24 @@ export function PlayerPortalPerformancePage() {
                               {delta > 0 ? `+${delta}` : delta}
                             </span>
                           )}
+                          {hasCurrent && !hasPrev && (
+                            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+                              <BilingualText value={bi('Initial Baseline', 'معيار أولي')} />
+                            </span>
+                          )}
                         </div>
                       </div>
 
                       {/* Progress bar */}
                       <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 transition-all duration-700"
-                          style={{ width: `${pct}%` }}
-                        />
+                        {hasCurrent ? (
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 transition-all duration-700"
+                            style={{ width: `${pct}%` }}
+                          />
+                        ) : (
+                          <div className="h-full w-0 bg-transparent" />
+                        )}
                       </div>
                     </div>
                   );
