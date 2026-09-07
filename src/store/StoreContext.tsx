@@ -1,9 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Toast } from '../components/ui/Toast';
 import { useUiSettings } from '../ui/theme/useUiSettings';
 import { previewCategories, previewProducts } from './storeData.preview';
 import type { StoreCartLine, StoreCategory, StoreDataState, StoreProduct } from './storeTypes';
 
-type AddOptions = { quantity?: number; size?: string; color?: string };
+type AddOptions = { quantity?: number; size?: string; color?: string; openMiniCart?: boolean };
+type WishlistToastState = {
+  isOpen: boolean;
+  title: { en: string; ar: string };
+  message: { en: string; ar: string };
+};
+
 type StoreContextValue = {
   state: StoreDataState;
   isPreview: boolean;
@@ -22,6 +29,7 @@ type StoreContextValue = {
   updateQuantity: (productId: string, quantity: number, size?: string, color?: string) => void;
   removeFromCart: (productId: string, size?: string, color?: string) => void;
   toggleWishlist: (productId: string) => void;
+  showWishlistToast: (title: { en: string; ar: string }, message: { en: string; ar: string }) => void;
 };
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
@@ -36,10 +44,48 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<StoreCartLine[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [miniCartOpen, setMiniCartOpen] = useState(false);
-  const locale = bilingualOrder === 'ar-first' ? 'ar' : 'en';
+  const [wishlistToast, setWishlistToast] = useState<WishlistToastState>({
+    isOpen: false,
+    title: { en: 'Added to Wishlist', ar: 'تمت الإضافة إلى المفضلة' },
+    message: { en: 'Product added to your wishlist.', ar: 'تمت إضافة المنتج إلى قائمة رغباتك.' },
+  });
 
+  const locale = bilingualOrder === 'ar-first' ? 'ar' : 'en';
   const products = catalog.products;
   const categories = catalog.categories;
+
+  const showWishlistToast = (title: { en: string; ar: string }, message: { en: string; ar: string }) => {
+    setWishlistToast({
+      isOpen: true,
+      title,
+      message,
+    });
+  };
+
+  const handleToggleWishlist = (productId: string) => {
+    const isAdding = !wishlist.includes(productId);
+    setWishlist((current) =>
+      current.includes(productId) ? current.filter((id) => id !== productId) : [...current, productId]
+    );
+
+    if (isAdding) {
+      const targetProduct = products.find((p) => p.id === productId);
+      if (targetProduct) {
+        showWishlistToast(
+          { en: 'Added to Wishlist', ar: 'تمت الإضافة للمفضلة' },
+          {
+            en: `"${targetProduct.name.en}" has been added to your wishlist.`,
+            ar: `تمت إضافة "${targetProduct.name.ar}" بنجاح إلى قائمة المفضلة.`,
+          }
+        );
+      } else {
+        showWishlistToast(
+          { en: 'Added to Wishlist', ar: 'تمت الإضافة للمفضلة' },
+          { en: 'Item added to your wishlist.', ar: 'تمت إضافة المنتج إلى قائمة رغباتك.' }
+        );
+      }
+    }
+  };
 
   const value = useMemo<StoreContextValue>(() => ({
     state: isPreview ? 'preview' : 'empty',
@@ -61,14 +107,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (existing) return current.map((line) => line === existing ? { ...line, quantity: line.quantity + (options.quantity ?? 1) } : line);
         return [...current, { product, quantity: options.quantity ?? 1, size: options.size, color: options.color }];
       });
-      setMiniCartOpen(true);
+      if (options.openMiniCart !== false) {
+        setMiniCartOpen(true);
+      }
     },
     updateQuantity: (productId, quantity, size, color) => setCart((current) => current.map((line) => line.product.id === productId && line.size === size && line.color === color ? { ...line, quantity: Math.max(1, quantity) } : line)),
     removeFromCart: (productId, size, color) => setCart((current) => current.filter((line) => !(line.product.id === productId && line.size === size && line.color === color))),
-    toggleWishlist: (productId) => setWishlist((current) => current.includes(productId) ? current.filter((id) => id !== productId) : [...current, productId]),
+    toggleWishlist: handleToggleWishlist,
+    showWishlistToast,
   }), [cart, categories, isPreview, locale, miniCartOpen, products, setSetting, wishlist]);
 
-  return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
+  return (
+    <StoreContext.Provider value={value}>
+      {children}
+      <Toast
+        isOpen={wishlistToast.isOpen}
+        type="success"
+        title={wishlistToast.title}
+        message={wishlistToast.message}
+        duration={3200}
+        onClose={() => setWishlistToast((prev) => ({ ...prev, isOpen: false }))}
+        isAr={locale === 'ar'}
+      />
+    </StoreContext.Provider>
+  );
 }
 
 export function useStore() {

@@ -1,16 +1,23 @@
 import {
+  AlertTriangle,
   Award,
   Bell,
+  Check,
   CheckCircle2,
   ChevronRight,
+  Clock,
+  Compass,
   CreditCard,
   Edit3,
+  FileText,
   Grid2X2,
   Heart,
+  Layers,
   List,
   LogOut,
   MapPin,
   Package,
+  PackageCheck,
   RotateCcw,
   Search,
   Settings,
@@ -654,9 +661,13 @@ export function ProductDetailPage() {
 
   const stockRemaining = useMemo(() => {
     if (!product) return 6;
+    if (typeof product.inventory === 'number') return product.inventory;
+    if (typeof product.inventoryCount === 'number') return product.inventoryCount;
     const code = (product.sku || 'UOS').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
     return (code % 11) + 4; // Between 4 and 14 items left
   }, [product]);
+
+  const isLowStock = stockRemaining < 5;
 
   if (!product) return <div className="store-page-pad"><StoreState kind="unavailable" title={{ en: 'Product unavailable', ar: 'المنتج غير متاح' }} description={{ en: 'This product is not available from the current verified source.', ar: 'هذا المنتج غير متاح من المصدر الموثق الحالي.' }} action={<Link className="store-button store-button-primary" to="/store/shop"><StoreCopy value={{ en: 'Return to Shop', ar: 'العودة للمتجر' }} inline /></Link>} /></div>;
   const related = products.filter((item) => item.id !== product.id && item.category === product.category).slice(0, 4);
@@ -679,14 +690,57 @@ export function ProductDetailPage() {
         <h1><StoreCopy value={product.name} /></h1>
         <div className="store-sku"><span>SKU</span><code>{product.sku}</code></div>
         <ProductPrice product={product} size="l" />
-        <div className="store-availability store-in-stock">
-          <span className="store-stock-pulse-dot" aria-hidden="true" />
-          <StoreCopy value={{ en: `In Stock · Only ${stockRemaining} left`, ar: `متوفر · متبقي ${stockRemaining} قطع فقط بالمخزون` }} inline />
-        </div>
+
+        {/* Inventory Stock Status & Low-Stock Warning */}
+        {isLowStock ? (
+          <div
+            className="store-low-stock-banner"
+            role="alert"
+            aria-live="polite"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '12px 14px',
+              backgroundColor: 'rgba(239, 68, 68, 0.12)',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              borderRadius: '8px',
+              color: '#ef4444',
+              marginTop: '12px',
+              marginBottom: '10px',
+              fontWeight: 600,
+              fontSize: '13px',
+            }}
+          >
+            <AlertTriangle size={18} className="shrink-0" style={{ color: '#ef4444' }} />
+            <div style={{ flex: 1 }}>
+              <StoreCopy
+                value={{
+                  en: `Low Stock Warning: Only ${stockRemaining} unit${stockRemaining === 1 ? '' : 's'} remaining in inventory! Order soon before it runs out.`,
+                  ar: `تحذير انخفاض المخزون: متبقي ${stockRemaining} ${stockRemaining === 1 ? 'قطعة فقط' : 'قطع فقط'} بالمخزون! اطلب الآن قبل نفاد الكمية.`,
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="store-availability store-in-stock">
+            <span className="store-stock-pulse-dot" aria-hidden="true" />
+            <StoreCopy value={{ en: `In Stock · ${stockRemaining} units available for fast dispatch`, ar: `متوفر · متبقي ${stockRemaining} قطع بالمخزون للشحن الفوري` }} inline />
+          </div>
+        )}
+
         {/* Stock Level Counter */}
         <div className="store-stock-meter-wrap" style={{ marginTop: '8px', marginBottom: '16px' }}>
           <div style={{ height: '6px', width: '100%', background: 'var(--store-border)', borderRadius: '999px', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${Math.min(100, (stockRemaining / 14) * 100)}%`, background: stockRemaining <= 6 ? '#f59e0b' : 'var(--store-gold)', borderRadius: '999px', transition: 'width 0.5s ease' }} />
+            <div
+              style={{
+                height: '100%',
+                width: `${Math.min(100, (stockRemaining / 15) * 100)}%`,
+                background: isLowStock ? '#ef4444' : stockRemaining <= 6 ? '#f59e0b' : 'var(--store-gold)',
+                borderRadius: '999px',
+                transition: 'width 0.5s ease',
+              }}
+            />
           </div>
         </div>
         <p><StoreCopy value={product.description} /></p>
@@ -1246,15 +1300,368 @@ export function AccountPage() {
 
 export function OrdersPage() {
   const [status, setStatus] = useState('all');
-  const tabs = [['all', 'All', 'الكل'], ['processing', 'Processing', 'قيد المعالجة'], ['shipped', 'Shipped', 'تم الشحن'], ['delivered', 'Delivered', 'تم التسليم'], ['cancelled', 'Cancelled', 'ملغي']];
-  return <AccountShell title={{ en: 'My Orders', ar: 'طلباتي' }}>
-    <OrderProgressTrackerCard />
-    <div className="store-order-tabs" role="tablist">{tabs.map(([id, en, ar]) => <button type="button" role="tab" aria-selected={status === id} className={status === id ? 'is-active' : ''} onClick={() => setStatus(id)} key={id}>{en} <small>{ar}</small></button>)}</div><StoreState kind="empty" title={{ en: `No verified ${status === 'all' ? '' : `${status} `}orders`, ar: 'لا توجد طلبات موثقة' }} description={{ en: 'Orders will appear after a real commerce and authentication source is connected.', ar: 'ستظهر الطلبات بعد ربط مصدر تجارة ومصادقة حقيقي.' }} action={<Link className="store-button store-button-primary" to="/store/shop"><StoreCopy value={{ en: 'Continue Shopping', ar: 'متابعة التسوق' }} inline /></Link>} /></AccountShell>;
+  const tabs = [
+    ['all', 'All Orders', 'جميع الطلبات'],
+    ['processing', 'Processing', 'قيد المعالجة'],
+    ['shipped', 'In Transit', 'في الطريق'],
+    ['delivered', 'Delivered', 'تم التسليم'],
+  ];
+
+  const sampleOrders = [
+    {
+      id: '88421',
+      date: '2026-09-05',
+      status: 'shipped',
+      statusLabel: { en: 'In Transit / Shipped', ar: 'تم الشحن وفي الطريق' },
+      itemsCount: 3,
+      total: '369.00 AED',
+      courier: 'United Olympics Express',
+      trackingNumber: 'UOS-DXB-99214',
+      productName: { en: 'Official Federation Match Football & Hydration Cap', ar: 'كرة قدم المباريات الرسمية وقبعة السباحة' },
+    },
+    {
+      id: '77319',
+      date: '2026-08-28',
+      status: 'delivered',
+      statusLabel: { en: 'Delivered', ar: 'تم التسليم بنجاح' },
+      itemsCount: 2,
+      total: '499.00 AED',
+      courier: 'DHL Express UAE',
+      trackingNumber: 'UOS-AUH-44102',
+      productName: { en: 'Aero-Weave Competition Track Jacket', ar: 'سترة التدريب الأولمبية المقاومة للرياح' },
+    },
+  ];
+
+  const filteredOrders = sampleOrders.filter((order) => status === 'all' || order.status === status);
+
+  return (
+    <AccountShell title={{ en: 'My Orders', ar: 'طلباتي' }}>
+      <OrderProgressTrackerCard />
+      <div className="store-order-tabs" role="tablist">
+        {tabs.map(([id, en, ar]) => (
+          <button
+            type="button"
+            role="tab"
+            aria-selected={status === id}
+            className={status === id ? 'is-active' : ''}
+            onClick={() => setStatus(id)}
+            key={id}
+          >
+            {en} <small>{ar}</small>
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display: 'grid', gap: '16px', marginTop: '16px' }}>
+        {filteredOrders.map((order) => (
+          <div
+            key={order.id}
+            style={{
+              padding: '18px 20px',
+              background: 'var(--store-soft)',
+              borderRadius: '12px',
+              border: '1px solid var(--store-border)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <span style={{ fontSize: '12px', color: 'var(--store-muted)', fontWeight: 600 }}>ORDER #{order.id}</span>
+                <h3 style={{ margin: '2px 0 0', fontSize: '15px' }}><StoreCopy value={order.productName} /></h3>
+              </div>
+              <span
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '999px',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  background: order.status === 'delivered' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(212, 175, 55, 0.18)',
+                  color: order.status === 'delivered' ? '#16a34a' : 'var(--store-gold)',
+                  border: `1px solid ${order.status === 'delivered' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(212, 175, 55, 0.4)'}`,
+                }}
+              >
+                <StoreCopy value={order.statusLabel} />
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', fontSize: '13px', color: 'var(--store-muted)' }}>
+              <span>📅 {order.date} · {order.itemsCount} items · <strong style={{ color: 'var(--store-gold)' }}>{order.total}</strong></span>
+              <Link
+                to={`/store/order/${order.id}`}
+                className="store-button store-button-primary"
+                style={{ padding: '8px 16px', fontSize: '13px', height: 'auto' }}
+              >
+                <Truck size={14} />
+                <StoreCopy value={{ en: 'Track Order & Status', ar: 'تتبع حالة الطلب' }} inline />
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
+    </AccountShell>
+  );
+}
+
+export function OrderTrackingStatus({ currentStatus = 'shipped' }: { currentStatus?: 'placed' | 'processing' | 'shipped' | 'delivered' }) {
+  const [activeState, setActiveState] = useState<'placed' | 'processing' | 'shipped' | 'delivered'>(currentStatus);
+
+  const steps = [
+    {
+      id: 'placed',
+      title: { en: 'Order Placed', ar: 'تم تقديم الطلب' },
+      desc: { en: 'Order verified & payment confirmed', ar: 'تم تأكيد الطلب والدفع بأمان' },
+      time: '09:30 AM',
+      icon: PackageCheck,
+    },
+    {
+      id: 'processing',
+      title: { en: 'Quality Inspection', ar: 'قيد التجهيز والفحص' },
+      desc: { en: 'Gear checked against Olympic standards', ar: 'مطابقة المعدات للمواصفات الأولمبية' },
+      time: '11:15 AM',
+      icon: Layers,
+    },
+    {
+      id: 'shipped',
+      title: { en: 'Dispatched / In Transit', ar: 'تم الشحن وفي الطريق' },
+      desc: { en: 'Courier vehicle #DXB-882 in transit', ar: 'المندوب في الطريق إلى العنوان المحدد' },
+      time: '02:40 PM',
+      icon: Truck,
+    },
+    {
+      id: 'delivered',
+      title: { en: 'Delivered', ar: 'تم التسليم بنجاح' },
+      desc: { en: 'Handover verified with athlete OTP', ar: 'تم تسليم الشحنة للرياضي بنجاح' },
+      time: '05:20 PM',
+      icon: CheckCircle2,
+    },
+  ];
+
+  const stepIndex = steps.findIndex((s) => s.id === activeState);
+  const progressPercent = stepIndex === 0 ? 12 : stepIndex === 1 ? 40 : stepIndex === 2 ? 75 : 100;
+
+  return (
+    <div style={{ display: 'grid', gap: '24px' }}>
+      {/* Simulation status switcher tabs */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', background: 'var(--store-soft)', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--store-border)' }}>
+        <span style={{ fontSize: '13px', fontWeight: 600 }}>
+          <StoreCopy value={{ en: 'Order Progress Simulation:', ar: 'محاكاة مرحلة الطلب:' }} inline />
+        </span>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {(['placed', 'processing', 'shipped', 'delivered'] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setActiveState(s)}
+              style={{
+                padding: '5px 12px',
+                fontSize: '12px',
+                fontWeight: 700,
+                borderRadius: '6px',
+                border: activeState === s ? '1px solid var(--store-gold)' : '1px solid var(--store-border)',
+                background: activeState === s ? 'var(--store-gold)' : 'transparent',
+                color: activeState === s ? '#000' : 'inherit',
+                cursor: 'pointer',
+                textTransform: 'capitalize',
+              }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Order Tracker Card */}
+      <div
+        style={{
+          background: 'var(--store-soft)',
+          borderRadius: '16px',
+          border: '1px solid var(--store-border)',
+          padding: '24px',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', borderBottom: '1px solid var(--store-border)', paddingBottom: '18px', marginBottom: '24px' }}>
+          <div>
+            <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--store-gold)' }}>LIVE SHIPMENT TRACKER</span>
+            <h2 style={{ margin: '4px 0', fontSize: '20px' }}>
+              <StoreCopy value={{ en: 'Order Tracking #UOS-88421', ar: 'تتبع الطلب رقم #UOS-88421' }} />
+            </h2>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--store-muted)' }}>
+              <StoreCopy value={{ en: 'Carrier: United Olympics Express · Air Waybill: UOS-DXB-99214', ar: 'الناقل: يونايتد أوليمبيكس إكسبريس · بوليصة الشحن: UOS-DXB-99214' }} />
+            </p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                borderRadius: '999px',
+                fontSize: '12px',
+                fontWeight: 700,
+                background: activeState === 'delivered' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(212, 175, 55, 0.15)',
+                color: activeState === 'delivered' ? '#16a34a' : 'var(--store-gold)',
+                border: `1px solid ${activeState === 'delivered' ? 'rgba(34, 197, 94, 0.4)' : 'rgba(212, 175, 55, 0.4)'}`,
+              }}
+            >
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: activeState === 'delivered' ? '#16a34a' : 'var(--store-gold)' }} />
+              <StoreCopy
+                value={
+                  activeState === 'placed'
+                    ? { en: 'Status: Placed', ar: 'الحالة: تم تقديم الطلب' }
+                    : activeState === 'processing'
+                    ? { en: 'Status: Processing', ar: 'الحالة: قيد التجهيز' }
+                    : activeState === 'shipped'
+                    ? { en: 'Status: In Transit', ar: 'الحالة: في الطريق' }
+                    : { en: 'Status: Delivered', ar: 'الحالة: تم التسليم' }
+                }
+              />
+            </span>
+            <p style={{ margin: '6px 0 0', fontSize: '12px', color: 'var(--store-muted)' }}>
+              <StoreCopy value={{ en: 'Estimated Delivery: Today by 7:00 PM', ar: 'التسليم المتوقع: اليوم حتى 7:00 مساءً' }} />
+            </p>
+          </div>
+        </div>
+
+        {/* Progress Bar & Steps Stepper */}
+        <div style={{ position: 'relative', margin: '20px 0 30px' }}>
+          {/* Connecting line */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '24px',
+              left: '5%',
+              right: '5%',
+              height: '4px',
+              background: 'var(--store-border)',
+              borderRadius: '999px',
+              zIndex: 1,
+            }}
+          >
+            <div
+              style={{
+                height: '100%',
+                width: `${progressPercent}%`,
+                background: 'var(--store-gold)',
+                borderRadius: '999px',
+                transition: 'width 0.4s ease',
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              position: 'relative',
+              zIndex: 2,
+              textAlign: 'center',
+            }}
+          >
+            {steps.map((step, idx) => {
+              const isPassed = idx < stepIndex;
+              const isCurrent = idx === stepIndex;
+              const Icon = step.icon;
+
+              return (
+                <div key={step.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '50%',
+                      background: isPassed
+                        ? '#16a34a'
+                        : isCurrent
+                        ? 'var(--store-gold)'
+                        : 'var(--store-soft)',
+                      color: isPassed ? '#fff' : isCurrent ? '#000' : 'var(--store-muted)',
+                      border: isPassed
+                        ? '2px solid #16a34a'
+                        : isCurrent
+                        ? '3px solid var(--store-gold)'
+                        : '2px solid var(--store-border)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '10px',
+                      boxShadow: isCurrent ? '0 0 16px rgba(212, 175, 55, 0.4)' : 'none',
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    {isPassed ? <Check size={22} /> : <Icon size={20} />}
+                  </div>
+                  <strong style={{ fontSize: '13px', marginBottom: '3px', color: isCurrent ? 'var(--store-gold)' : 'inherit' }}>
+                    <StoreCopy value={step.title} />
+                  </strong>
+                  <span style={{ fontSize: '11px', color: 'var(--store-muted)', maxWidth: '140px', lineHeight: 1.3 }}>
+                    <StoreCopy value={step.desc} />
+                  </span>
+                  <span style={{ fontSize: '10px', color: 'var(--store-muted)', marginTop: '4px', fontWeight: 600 }}>
+                    {step.time}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Timeline Log & Destination info */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginTop: '28px', borderTop: '1px solid var(--store-border)', paddingTop: '20px' }}>
+          <div style={{ padding: '16px', background: 'var(--store-bg)', borderRadius: '10px', border: '1px solid var(--store-border)' }}>
+            <h4 style={{ margin: '0 0 12px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--store-gold)' }}>
+              <MapPin size={16} />
+              <StoreCopy value={{ en: 'Delivery Destination', ar: 'عنوان التسليم' }} />
+            </h4>
+            <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: 700 }}>Captain Rashid Al-Nuaimi</p>
+            <p style={{ margin: '0 0 4px', fontSize: '13px', color: 'var(--store-muted)' }}>Villa 14, Dubai Sports City, Dubai, UAE</p>
+            <p style={{ margin: 0, fontSize: '12px', color: 'var(--store-muted)' }}>📞 +971 50 123 4567</p>
+          </div>
+
+          <div style={{ padding: '16px', background: 'var(--store-bg)', borderRadius: '10px', border: '1px solid var(--store-border)' }}>
+            <h4 style={{ margin: '0 0 12px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--store-gold)' }}>
+              <Package size={16} />
+              <StoreCopy value={{ en: 'Order Package Summary', ar: 'محتويات الشحنة' }} />
+            </h4>
+            <div style={{ fontSize: '13px', display: 'grid', gap: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>1x Official Match Football (Size 5)</span>
+                <strong>120.00 AED</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>1x Hydro-Glide Mirror Goggles</span>
+                <strong>149.00 AED</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--store-border)', paddingTop: '6px', marginTop: '4px', fontWeight: 700, color: 'var(--store-gold)' }}>
+                <span><StoreCopy value={{ en: 'Total Paid (GCC Express Included)', ar: 'المجموع الكلي (شامل الشحن السريع)' }} /></span>
+                <span>269.00 AED</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function OrderDetailPage() {
   const { id } = useParams();
-  return <AccountShell title={{ en: 'Order Details', ar: 'تفاصيل الطلب' }}><StoreState kind="unavailable" title={{ en: 'Order source unavailable', ar: 'مصدر الطلب غير متاح' }} description={{ en: `No verified order was found for reference ${id ?? '—'}. Timeline, payment and shipment actions remain disabled.`, ar: `لم يتم العثور على طلب موثق للمرجع ${id ?? '—'}. يظل الخط الزمني وإجراءات الدفع والشحن معطلة.` }} action={<Link className="store-button store-button-secondary" to="/store/orders"><StoreCopy value={{ en: 'Back to Orders', ar: 'العودة للطلبات' }} inline /></Link>} /></AccountShell>;
+
+  return (
+    <AccountShell title={{ en: `Order #${id || '88421'} Details`, ar: `تفاصيل الطلب #${id || '88421'}` }}>
+      <OrderTrackingStatus currentStatus="shipped" />
+      <div style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
+        <Link className="store-button store-button-secondary" to="/store/orders">
+          <StoreCopy value={{ en: 'Back to My Orders', ar: 'العودة لطلباتي' }} inline />
+        </Link>
+        <Link className="store-button store-button-primary" to="/store/shop">
+          <StoreCopy value={{ en: 'Continue Shopping', ar: 'متابعة التسوق' }} inline />
+        </Link>
+      </div>
+    </AccountShell>
+  );
 }
 
 export function WishlistPage() {

@@ -26,6 +26,8 @@ export interface StoreProduct {
   gallery?: string[];
   colors?: BilingualText[];
   sizes?: string[];
+  inventory?: number;
+  inventoryCount?: number;
 }
 
 export interface StoreCartLine {
@@ -33,6 +35,44 @@ export interface StoreCartLine {
   quantity: number;
   size?: string;
   color?: string;
+}
+
+export type OrderStatus = 'placed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+
+export interface StoreOrderItem {
+  product: StoreProduct;
+  quantity: number;
+  price: number;
+  size?: string;
+  color?: string;
+}
+
+export interface StoreOrder {
+  id: string;
+  date: string;
+  status: OrderStatus;
+  total: number;
+  currency: string;
+  items: StoreOrderItem[];
+  trackingNumber: string;
+  carrier: string;
+  estimatedDelivery: string;
+  shippingAddress: {
+    fullName: string;
+    street: string;
+    city: string;
+    emirate: string;
+    country: string;
+    phone: string;
+  };
+  timeline: {
+    status: OrderStatus;
+    title: BilingualText;
+    description: BilingualText;
+    timestamp: string;
+    isCompleted: boolean;
+    isCurrent: boolean;
+  }[];
 }
 
 export type StoreDataState = 'preview' | 'empty' | 'loading' | 'error';

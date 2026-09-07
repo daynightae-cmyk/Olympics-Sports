@@ -70,8 +70,10 @@ export function ProductCard({ product, compact = false }: { product: StoreProduc
     ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
     : 0;
 
-  const handleQuickAdd = () => {
-    addToCart(product, { quantity: 1, size: selectedSize, color: selectedColor });
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product, { quantity: 1, size: selectedSize, color: selectedColor, openMiniCart: false });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };

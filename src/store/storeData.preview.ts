@@ -87,6 +87,7 @@ export const previewProducts: StoreProduct[] = [
       '/media/user-products/product_04.png',
     ],
     colors: blackGold,
+    inventory: 3,
   },
   {
     id: 'uo-swim-cap-pro',
@@ -108,6 +109,7 @@ export const previewProducts: StoreProduct[] = [
       '/media/user-products/product_02.png',
     ],
     colors: blackGold,
+    inventory: 4,
   },
   {
     id: 'uo-hydro-training-fins',
@@ -127,6 +129,7 @@ export const previewProducts: StoreProduct[] = [
     image: '/media/user-products/product_14.png',
     gallery: ['/media/user-products/product_14.png'],
     colors: [bi('Black / Gold', 'أسود / ذهبي')],
+    inventory: 14,
   },
   {
     id: 'uo-training-kickboard',
@@ -144,6 +147,7 @@ export const previewProducts: StoreProduct[] = [
     image: '/media/user-products/product_15.png',
     gallery: ['/media/user-products/product_15.png'],
     colors: [bi('Matte Black / Gold', 'أسود مطفي / ذهبي')],
+    inventory: 9,
   },
   {
     id: 'uo-pro-match-ball',
@@ -165,6 +169,7 @@ export const previewProducts: StoreProduct[] = [
       '/media/user-products/product_06.png',
     ],
     colors: blackGold,
+    inventory: 18,
   },
   {
     id: 'uo-training-top',
@@ -187,6 +192,7 @@ export const previewProducts: StoreProduct[] = [
       '/media/user-products/product_08.png',
     ],
     colors: blackGold,
+    inventory: 2,
   },
   {
     id: 'uo-training-shorts',
@@ -209,6 +215,7 @@ export const previewProducts: StoreProduct[] = [
       '/media/user-products/product_11.png',
     ],
     colors: blackGold,
+    inventory: 15,
   },
   {
     id: 'uo-pro-track-jacket',
@@ -228,6 +235,7 @@ export const previewProducts: StoreProduct[] = [
     image: '/media/user-products/product_12.png',
     gallery: ['/media/user-products/product_12.png'],
     colors: [bi('Black / Gold', 'أسود / ذهبي')],
+    inventory: 3,
   },
   {
     id: 'uo-athlete-duffle-bag',
@@ -246,6 +254,7 @@ export const previewProducts: StoreProduct[] = [
     image: '/media/user-products/product_13.png',
     gallery: ['/media/user-products/product_13.png'],
     colors: [bi('Obsidian / Gold', 'أسود نفاث / ذهبي')],
+    inventory: 8,
   },
   {
     id: 'uo-insulated-bottle',
@@ -263,6 +272,7 @@ export const previewProducts: StoreProduct[] = [
     image: '/media/user-products/product_16.png',
     gallery: ['/media/user-products/product_16.png'],
     colors: [bi('Matte Black / Gold', 'أسود مطفي / ذهبي')],
+    inventory: 22,
   },
   {
     id: 'uo-gold-goggles',
@@ -277,6 +287,7 @@ export const previewProducts: StoreProduct[] = [
     badge: 'new',
     image: '/media/products/gold_swim_goggles_1788602294440.jpg',
     colors: [bi('Gold', 'ذهبي')],
+    inventory: 4,
   },
   {
     id: 'uo-white-gold-goggles',
@@ -291,6 +302,7 @@ export const previewProducts: StoreProduct[] = [
     badge: 'featured',
     image: '/media/products/white_gold_goggles_1788602316154.jpg',
     colors: [bi('White / Gold', 'أبيض / ذهبي')],
+    inventory: 11,
   },
   {
     id: 'uo-match-ball-white',
